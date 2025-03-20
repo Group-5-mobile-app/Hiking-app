@@ -5,6 +5,7 @@ import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import MapScreen from "../screens/MapScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="Kartta" component={MapScreen} />
                 <Stack.Screen name="Kirjaudu" component={LoginScreen} />
                 <Stack.Screen name="Luo tili" component={SignUpScreen} />
+                <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );
