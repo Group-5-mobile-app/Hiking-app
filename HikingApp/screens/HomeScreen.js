@@ -21,7 +21,7 @@ const HomeScreen = ({ navigation }) => {
             
             <Button
             mode="contained"
-            onPress={() => navigation.navigate("MapScreen")}
+            onPress={() => navigation.navigate("Kartta")}
             style={styles.button}
             >
               Kartta
