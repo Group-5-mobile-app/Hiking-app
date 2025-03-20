@@ -13,10 +13,9 @@ const AppNavigator = () => {
         <NavigationContainer>
             <Stack.Navigator>
                 <Stack.Screen name="Koti" component={HomeScreen} />
-                <Stack.Screen name="Kartta" component={HikingMapScreen} />
+                <Stack.Screen name="Kartta" component={MapScreen} />
                 <Stack.Screen name="Kirjaudu" component={LoginScreen} />
                 <Stack.Screen name="Luo tili" component={SignUpScreen} />
-                <Stack.Screen name="Kartta" component={MapScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );
