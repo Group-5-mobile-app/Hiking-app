@@ -1,32 +1,82 @@
 import React, { useEffect, useState } from "react";
-import MapView, { UrlTile, Polyline } from "react-native-maps";
 import { View, StyleSheet } from "react-native";
+import MapView, { UrlTile } from "react-native-maps";
+import xml2js from "react-native-xml2js";
 
-const MapScreen = ({ navigation }) => {
-  const [trails, setTrails] = useState([]);
+const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
+const CAPABILITIES_URL = "https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml";
+
+const MapScreen = () => {
+  const [tileUrl, setTileUrl] = useState(null);
 
   useEffect(() => {
-    fetchTrails();
-  }, []);
+    const fetchCapabilities = async () => {
+      try {
+        const response = await fetch(CAPABILITIES_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-  const fetchTrails = async () => {
-    const apiUrl = `https://avoin-paikkatieto.maanmittauslaitos.fi/maastotiedot/features/v1/collections/tieviiva/items?bbox=24.9,60.1,25.1,60.3&crs=http://www.opengis.net/def/crs/EPSG/0/3067&api-key=e6311845-2b5c-4e0f-babc-83539e8434e7`;
-    
-    try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      const trailCoordinates = data.features.map((feature) => ({
-        id: feature.id,
-        coordinates: feature.geometry.coordinates.map(([lon, lat]) => ({
-          latitude: lat,
-          longitude: lon,
-        })),
-      }));
-      setTrails(trailCoordinates);
-    } catch (error) {
-      console.error("Error fetching trails:", error);
-    }
-  };
+        const text = await response.text();
+        console.log("XML response: ", text); // Debug log
+        if (!text || text.trim() === "") {
+          throw new Error("Empty response from server");
+        }
+
+        // Parse XML using xml2js
+        xml2js.parseString(text, (err, result) => {
+          if (err) {
+            console.error("XML Parsing Error:", err);
+            return;
+          }
+        
+          console.log("Parsed XML:", result); // Debugging line
+
+          if (!result || !result.Capabilities) {
+            console.error("Invalid XML structure:", result);
+            return;
+          }
+
+          // Find "maastokartta" layer
+          const layers = result.Capabilities.Contents[0].Layer;
+          let tileTemplate = null;
+
+          layers.forEach((layer) => {
+            const id = layer["ows:Identifier"][0];
+            if (id === "maastokartta") {
+              const resourceUrls = layer.ResourceURL;
+              resourceUrls.forEach((resource) => {
+                if (resource.$.format === "image/png") {
+                  tileTemplate = resource.$.template;
+                }
+              });
+            }
+          });
+
+          if (!tileTemplate) {
+            console.error("No PNG tile URL found.");
+            return;
+          }
+
+          // Replace placeholders with MapView-compatible variables
+          let finalUrl = tileTemplate
+            .replace("{TileMatrixSet}", "WGS84_Pseudo-Mercator")
+            .replace("{TileMatrix}", "{z}")
+            .replace("{TileRow}", "{y}")
+            .replace("{TileCol}", "{x}");
+
+          // Append API key
+          finalUrl += `?api-key=${API_KEY}`;
+
+          setTileUrl(finalUrl);
+        });
+      } catch (error) {
+        console.error("Error fetching WMTS capabilities:", error);
+      }
+    };
+
+    fetchCapabilities();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -39,29 +89,19 @@ const MapScreen = ({ navigation }) => {
           longitudeDelta: 0.1,
         }}
       >
-        {/* Add Topographic Map Tiles */}
-        <UrlTile
-          urlTemplate="https://avoin-karttakuva.maanmittauslaitos.fi/taustakartat/service/wmts?api-key=e6311845-2b5c-4e0f-babc-83539e8434e7"
-          maximumZ={19}
-        />
-
-        {/* Draw Trails on the Map */}
-        {trails.map((trail) => (
-          <Polyline
-            key={trail.id}
-            coordinates={trail.coordinates}
-            strokeWidth={3}
-            strokeColor="green"
-          />
-        ))}
+        {tileUrl && <UrlTile urlTemplate={tileUrl} zIndex={1} tileSize={256} />}
       </MapView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { flex: 1 },
+  container: {
+    flex: 1,
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
 });
 
 export default MapScreen;
