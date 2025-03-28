@@ -1,11 +1,22 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Button, Text, TextInput, Card } from "react-native-paper";
+import { registerUser } from "../firebase/auth";
 
 const SignUpScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+
+    const handleSignUp = async () => {
+        try {
+            const newUser = await registerUser(email, password, confirmPassword);
+            Alert.alert("Tili luotu onnistuneesti!", `Tervetuloa ${newUser.email}`);
+            navigation.navigate("Kirjaudu");
+        } catch (error) {
+            Alert.alert("Error", error.message);
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -44,7 +55,7 @@ const SignUpScreen = ({ navigation }) => {
                         style={styles.input}
                     />
 
-                    <Button mode="contained" style={styles.button}>
+                    <Button mode="contained" style={styles.button} onPress={handleSignUp}>
                         Luo tili
                     </Button>
 
