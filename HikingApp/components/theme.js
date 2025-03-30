@@ -9,6 +9,8 @@ const theme = {
         background: "#616161",
         surface: "#ffffff",
         text: "#ffffff",
+        white: "#ffffff",
+        black: "#000000",
     },
 };
 
