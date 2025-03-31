@@ -43,6 +43,7 @@
     "react-native-screens": "^4.9.2",
     "react-native-tcp": "^3.2.1",
     "react-native-udp": "^2.1.0",
+    "react-native-webview": "^13.13.5",
     "react-native-xml2js": "^1.0.3",
     "readable-stream": "^1.0.33",
     "rn-nodeify": "^10.3.0",
