@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import MapView, { Marker, UrlTile, PROVIDER_DEFAULT } from "react-native-maps";
+import * as Location from 'expo-location'
+
 
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
+  const [position, setPosition] = useState(null)
 
   useEffect(() => {
     fetchRestStops();
+    requestLocationPermission();
   }, []);
 
   const fetchRestStops = async () => {
@@ -16,7 +20,7 @@ const MapScreen = () => {
       const response = await fetch("https://tulikartta.fi/api-json2.php");
       const data = await response.json();
 
-      console.log("Raw API Response:", data);
+      //console.log("Raw API Response:", data);
 
       const filteredStops = data
       .filter((item) => item.tyyppi === "Nuotiopaikka" && item.koordinaatti)
@@ -32,7 +36,7 @@ const MapScreen = () => {
         };
       });
 
-      console.log("Filtered Rest Stops (Nuotiopaikka):", filteredStops);
+      //console.log("Filtered Rest Stops (Nuotiopaikka):", filteredStops);
 
       setRestStops(filteredStops);
     } catch (error) {
@@ -40,17 +44,34 @@ const MapScreen = () => {
     }
   };
 
+  const requestLocationPermission = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if(status !== "granted") {
+      Alert.alert("Permission Denied", "Allow location access to center the map.");
+      return;
+    }
+
+    const location = await Location.getCurrentPositionAsync({});
+    setPosition({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    });
+  };
+
   return (
     <View style={styles.container}>
       <MapView
-        provider={PROVIDER_DEFAULT}
         style={styles.map}
-        initialRegion={{
+        initialRegion={position || {
           latitude: 60.2,
           longitude: 25.0,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
+          latitudeDelta: 2.5,
+          longitudeDelta: 2.5,
         }}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
       >
         <UrlTile 
         urlTemplate="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
