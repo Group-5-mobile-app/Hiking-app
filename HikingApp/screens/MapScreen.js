@@ -3,8 +3,8 @@ import { View, StyleSheet, Alert } from "react-native";
 import MapView, { Marker, UrlTile, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from 'expo-location'
 
+
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
-const CAPABILITIES_URL = "https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml";
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
@@ -74,8 +74,9 @@ const MapScreen = () => {
         showsMyLocationButton={true}
       >
         <UrlTile 
-        urlTemplate="https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{z}/{x}/{y}.png"
-        zIndex={1}
+        urlTemplate="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maximumZ={19}
+        flipY={false}
         />
 
         {restStops.map((stop, index) => (
