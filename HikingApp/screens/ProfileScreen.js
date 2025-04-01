@@ -100,7 +100,12 @@ const styles = StyleSheet.create({
     button: {
         marginTop: 20,
         backgroundColor: theme.colors.red
-    }
+    },
+        email: {
+        fontSize: 16,
+        marginBottom: 20,
+        color: theme.colors.text,
+    },
 });
 
 
