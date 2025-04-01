@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-ORS_API_KEY = "5b3ce3597851110001cf62483b76c10c645e4d018a5ae55d8fd9e72a"
+ORS_API_KEY = "your_key"
 
 @app.route("/get_route", methods=["POST"])
 def get_route():
