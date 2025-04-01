@@ -11,6 +11,7 @@ const theme = {
         text: "#ffffff",
         white: "#ffffff",
         black: "#000000",
+        red: "#FF0000",
     },
 };
 
