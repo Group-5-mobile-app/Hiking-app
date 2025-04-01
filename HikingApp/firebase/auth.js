@@ -1,10 +1,18 @@
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "./firebaseConfig";
+import { auth, db } from "./firebaseConfig";
+import { doc, setDoc, } from 'firebase/firestore'
 
 export const registerUser = async (email, password) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        return userCredential.user;
+        const user = userCredential.user;
+
+        await setDoc(doc(db, "user", user.uid), {
+            uid: user.uid,
+            email: user.email,
+        });
+
+        return user;
     } catch (error) {
         console.error("Error signing up: ", error);
         throw error;

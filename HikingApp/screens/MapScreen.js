@@ -1,14 +1,61 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import MapView, { Marker, UrlTile, PROVIDER_DEFAULT } from "react-native-maps";
+import { View, StyleSheet, Alert, TouchableOpacity } from "react-native";
+import MapView, { Marker, UrlTile } from "react-native-maps";
+import { Button } from "react-native-paper";
 import * as Location from 'expo-location'
+import { Ionicons } from "@expo/vector-icons";
 
-
+const SERVER_URL = "http://localhost:5000";
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
   const [position, setPosition] = useState(null)
+  const [waypoints, setWaypoints] = useState([]);
+  const [routePath, setRoutePath] = useState([]);
+  const [routeName, setRouteName] = useState("");
+  const [isAdding, setIsAdding] = useState(false); 
+
+  const toggleAddRoute = () => {
+    setIsAdding(!isAdding);
+    if (!isAdding) {
+      setWaypoints([]);
+    }
+  };
+
+  const handleMapPress = (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setWaypoints([...waypoints, { latitude, longitude }]);
+  };
+
+  const fetchRoute = async () => {
+    if (waypoints.length < 2) {
+      Alert.alert("Select at least two points");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${SERVER_URL}/get_route`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ waypoints }),
+      });
+
+      const data = await response.json();
+      if (data.features) {
+        const coords = data.features[0].geometry.coordinates.map(coord => ({
+          latitude: coord[1], longitude: coord[0]
+        }));
+
+        setRoutePath(coords);
+      } else {
+        Alert.alert("Error", "Failed to fetch route");
+      }
+    } catch (error) {
+      console.error("Error fetching route: ", error);
+      Alert.alert("Network error");
+    }
+  };
 
   useEffect(() => {
     fetchRestStops();
@@ -91,6 +138,12 @@ const MapScreen = () => {
           />
         ))}
       </MapView>
+
+      <Button title="Save Route" onPress={saveRoute} />
+
+      <TouchableOpacity style={styles.fab} onPress={toggleAddRoute}>
+        <Ionicons name={isAdding ? "close":"add"} size={30} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -101,6 +154,18 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "blue",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
 });
 
