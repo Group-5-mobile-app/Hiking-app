@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import MapView, { Marker, UrlTile } from "react-native-maps";
-import { Button } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import * as Location from 'expo-location'
 import { Ionicons } from "@expo/vector-icons";
+import { saveRoute } from "../firebase/firestore";
 
 const SERVER_URL = "http://localhost:5000";
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
@@ -119,30 +120,52 @@ const MapScreen = () => {
         }}
         showsUserLocation={true}
         showsMyLocationButton={true}
+        onPress={handleMapPress} // Allow pressing only when adding mode is active
       >
         <UrlTile 
-        urlTemplate="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        maximumZ={19}
-        flipY={false}
+          urlTemplate="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+          maximumZ={19}
+          flipY={false}
         />
 
         {restStops.map((stop, index) => (
           <Marker 
-          key={index}
-          coordinate={{
-            latitude: stop.latitude,
-            longitude: stop.longitude,
-          }}
-          title={stop.nimi}
-          description={`Type: ${stop.tyyppi}`}
+            key={index}
+            coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
+            title={stop.nimi}
+            description={`Type: ${stop.tyyppi}`}
           />
         ))}
+
+        {/* Render Waypoints */}
+        {waypoints.map((point, index) => (
+          <Marker key={index} coordinate={point} title={`Point ${index + 1}`} />
+        ))}
+
+        {/* Draw Route Path */}
+        {waypoints.length > 1 && (
+          <Polyline coordinates={waypoints} strokeWidth={4} strokeColor="green" />
+        )}
       </MapView>
 
-      <Button title="Save Route" onPress={saveRoute} />
+      {/* Show input field and save button only when adding mode is active */}
+      {isAdding && (
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Route Name"
+            value={routeName}
+            onChangeText={setRouteName}
+          />
+          <Button mode="contained" onPress={saveRoute} style={styles.saveButton}>
+            Save Route
+          </Button>
+        </View>
+      )}
 
+      {/* Floating Action Button */}
       <TouchableOpacity style={styles.fab} onPress={toggleAddRoute}>
-        <Ionicons name={isAdding ? "close":"add"} size={30} />
+        <Ionicons name={isAdding ? "close" : "add"} size={30} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -159,7 +182,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: "blue",
+    backgroundColor: "#689f38",
     width: 60,
     height: 60,
     borderRadius: 30,
