@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconButton } from "react-native-paper";
 import { auth, db } from "../firebase/firebaseConfig";
-import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, setDoc, writeBatch } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
 import theme from "../components/theme";
 
 const ProfileScreen = ({ navigation }) => {
@@ -13,11 +13,9 @@ const ProfileScreen = ({ navigation }) => {
     
     const [addFriendDialogVisible, setAddFriendDialogVisible] = useState(false);
     const [removeFriendDialogVisible, setRemoveFriendDialogVisible] = useState(false);
-    const [errorDialogVisible, setErrorDialogVisible] = useState(false);
     
     const [friendEmail, setFriendEmail] = useState("");
     const [selectedFriend, setSelectedFriend] = useState(null);
-    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (auth.currentUser) {
@@ -371,12 +369,6 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.primary,
         color: theme.colors.text
     },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 10,
-        color: theme.colors.text,
-    },
     cardTitle: {
         fontSize: 20,
         fontWeight: "bold",
@@ -482,9 +474,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 10,
-    },
-    dialogInput: {
         marginBottom: 10,
     },
     emptyListText: {
