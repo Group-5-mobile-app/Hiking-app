@@ -1,10 +1,10 @@
 import { getAuth } from 'firebase/auth';
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, Firestore, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, firestore, serverTimestamp } from 'firebase/firestore'
 
-export const saveRoute = async (user_id, routeData) => {
+export const saveRoute = async (uid, routeData) => {
     try {
-        const routeRef = collection(db, `user/${user_id}/saved/routes`);
+        const routeRef = collection(db, `user/${uid}/routes`);
         const docRef = await addDoc(routeRef, {
             ...routeData,
             createdAt: serverTimestamp()
@@ -18,7 +18,7 @@ export const saveRoute = async (user_id, routeData) => {
 
 export const getUserRoutes = async (user_id) => {
     try {
-        const routesRef = collection(db, `user/${user_id}/saved/routes`);
+        const routesRef = collection(db, `user/${user_id}/routes`);
         const querySnapshot = await getDocs(routesRef);
         return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
@@ -27,17 +27,19 @@ export const getUserRoutes = async (user_id) => {
     }
 };
 
-export const savePath = async (name, length) => {
+export const savePath = async (name, routePath) => {
     const auth = getAuth();
     const user = auth.currentUser;
 
     if (!user) throw new Error("Kirjaudu sisään luodaksesi reittejä.");
 
     try {
-        const pathRef = collection(firestore, `user/${user.uid}/saved/paths`);
+        const pathRef = collection(db, `user/${user.uid}/paths`);
+
         await addDoc(pathRef, {
             name,
-            length,
+            length: routePath.length,
+            routePath,
             createdAt: serverTimestamp()
         });
         return true;
@@ -49,7 +51,7 @@ export const savePath = async (name, length) => {
 
 export const getUserPaths = async (user_id) => {
     try {
-        const pathsRef = collection(db, `user/ ${user_id}/saved/paths`);
+        const pathsRef = collection(db, `user/${user_id}/paths`);
         const querySnapshot = await getDocs(pathsRef);
         return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
