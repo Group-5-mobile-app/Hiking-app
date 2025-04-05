@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Alert, TouchableOpacity } from "react-native";
-import MapView, { Marker, UrlTile } from "react-native-maps";
+import MapView, { Marker, UrlTile, Polyline } from "react-native-maps";
 import { Button, TextInput } from "react-native-paper";
 import * as Location from 'expo-location'
 import { Ionicons } from "@expo/vector-icons";
-import { saveRoute } from "../firebase/firestore";
+import { savePath } from "../firebase/firestore";
 
-const SERVER_URL = "http://localhost:5000";
+const SERVER_URL = "http://192.168.1.106:5000";
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
 
 const MapScreen = () => {
@@ -24,9 +24,31 @@ const MapScreen = () => {
     }
   };
 
-  const handleMapPress = (event) => {
+  const handleMapPress = async (event) => {
+    if (!isAdding) return;
+
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    setWaypoints([...waypoints, { latitude, longitude }]);
+    const updatedWaypoints = [...waypoints, { latitude, longitude }];
+    setWaypoints(updatedWaypoints);
+
+    if (updatedWaypoints.length >= 2) {
+      try {
+        const response = await fetch(`${SERVER_URL}/get_route`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ waypoints: updatedWaypoints }),
+        });
+        const data = await response.json();
+        if (data.features) {
+          const coords = data.features[0].geometry.coordinates.map(coord => ({
+            latitude: coord[1], longitude: coord[0]
+          }));
+          setRoutePath(coords);
+        }
+      } catch (error) {
+        console.error("Error fetching route:", error);
+      }
+    }
   };
 
   const fetchRoute = async () => {
@@ -144,7 +166,7 @@ const MapScreen = () => {
 
         {/* Draw Route Path */}
         {waypoints.length > 1 && (
-          <Polyline coordinates={waypoints} strokeWidth={4} strokeColor="green" />
+          <Polyline coordinates={routePath} strokeWidth={4} strokeColor="green" />
         )}
       </MapView>
 
@@ -157,8 +179,26 @@ const MapScreen = () => {
             value={routeName}
             onChangeText={setRouteName}
           />
-          <Button mode="contained" onPress={saveRoute} style={styles.saveButton}>
-            Save Route
+          <Button 
+            mode="contained" 
+            onPress={async () => {
+              await fetchRoute();
+              savePath(routeName, routePath);
+              setIsAdding(false);
+            }} 
+            style={styles.saveButton}
+            >
+            Save Path
+          </Button>
+          <Button
+          mode="outlined"
+          onPress={() => {
+            setWaypoints(prev => prev.slice(0, -1));
+            setRoutePath([]);
+          }}
+          style={{ marginTop: 10 }}
+          >
+            Undo
           </Button>
         </View>
       )}
