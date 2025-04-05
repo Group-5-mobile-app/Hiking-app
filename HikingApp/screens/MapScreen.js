@@ -19,7 +19,6 @@ const AVAILABLE_TYPES = [
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
-  const [position, setPosition] = useState(null)
   const [waypoints, setWaypoints] = useState([]);
   const [routePath, setRoutePath] = useState([]);
   const [routeName, setRouteName] = useState("");
