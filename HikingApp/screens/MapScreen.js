@@ -8,7 +8,7 @@ import { savePath } from "../firebase/firestore";
 import { Checkbox } from "react-native-paper";
 import Slider from '@react-native-community/slider';
 
-const SERVER_URL = "http://192.168.1.106:5000";
+const SERVER_URL = "http://192.168.1.106:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
   
 const AVAILABLE_TYPES = [
@@ -16,6 +16,11 @@ const AVAILABLE_TYPES = [
   "Päivätupa", "Kammi", "Sauna", "Ruokailukatos", "Lintutorni",
   "Nähtävyys", "Luola", "Lähde"
 ]; // Filter options
+
+const iconMap = {
+  Nuotiopaikka: require("../assets/icons/nuotiopaikka.png"),
+  Laavu: require("../assets/icons/laavu.png"),
+};
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
@@ -169,6 +174,10 @@ const MapScreen = () => {
     }
   };
 
+  const getMarkerIcon = (type) => {
+    return iconMap[type];
+  };
+
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radius of Earth in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -202,6 +211,19 @@ const MapScreen = () => {
     debounceTimeout.current = setTimeout(() => {
       setDebouncedRadius(value); // Update debounced value after a delay
     }, 500); // 500ms delay
+  };
+
+  const calculateDistance = (coordinates) => {
+    let total = 0;
+    for (let i = 1; i < coordinates.length; i++) {
+      total += getDistanceFromLatLonInKm(
+        coordinates[i - 1].latitude,
+        coordinates[i - 1].longitude,
+        coordinates[i].latitude,
+        coordinates[i].longitude
+      );
+    }
+    return total * 1000;
   };
 
   return (
@@ -284,6 +306,7 @@ const MapScreen = () => {
               coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
               title={stop.nimi}
               description={`Type: ${stop.tyyppi}`}
+              image={getMarkerIcon(stop.tyyppi)}
             />
           );
         })}
@@ -312,7 +335,8 @@ const MapScreen = () => {
             mode="contained" 
             onPress={async () => {
               await fetchRoute();
-              savePath(routeName, routePath);
+              const lengthInMeters = calculateDistance(routePath);
+              await savePath(routeName, lengthInMeters, routePath);
               setIsAdding(false);
             }} 
             style={styles.saveButton}
@@ -426,6 +450,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,
+    zIndex: 8,
+  },
+  inputContainer: {
+    position: "absolute",
+    top: 0,
+    left: 10,
+    right: 10,
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    elevation: 6,
+    zIndex: 12,
+  },
+  input: {
+    marginBottom: 10,
+  },
+  saveButton: {
+    backgroundColor: "#007AFF",
+    marginBottom: 5,
   },
 });
 

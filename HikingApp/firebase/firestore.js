@@ -1,6 +1,6 @@
 import { getAuth } from 'firebase/auth';
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, firestore, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, firestore, serverTimestamp, query, orderBy } from 'firebase/firestore'
 
 export const saveRoute = async (uid, routeData) => {
     try {
@@ -27,7 +27,7 @@ export const getUserRoutes = async (user_id) => {
     }
 };
 
-export const savePath = async (name, routePath) => {
+export const savePath = async (name, length, routePath) => {
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -38,7 +38,7 @@ export const savePath = async (name, routePath) => {
 
         await addDoc(pathRef, {
             name,
-            length: routePath.length,
+            length,
             routePath,
             createdAt: serverTimestamp()
         });
@@ -49,11 +49,21 @@ export const savePath = async (name, routePath) => {
     }
 };
 
-export const getUserPaths = async (user_id) => {
+export const getUserPaths = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) throw new Error("Kirjaudu sisään luodaksesi reittejä.");
+
     try {
-        const pathsRef = collection(db, `user/${user_id}/paths`);
-        const querySnapshot = await getDocs(pathsRef);
-        return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const pathsRef = collection(db, `user/${user.uid}/paths`);
+        const q = query(pathsRef, orderBy("createdAt", "desc"));
+
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
     } catch (error) {
         console.error("Error fetching paths: ", error);
         throw error;
