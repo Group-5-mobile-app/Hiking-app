@@ -80,7 +80,7 @@ const PathScreen = ({ navigation }) => {
                     )}
                 />
 
-                <Button mode="contained" style={styles.button} onPress={() => setViewMode("add")}>
+                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta",)}>
                     Lisää Reitti
                 </Button>
                 </>
