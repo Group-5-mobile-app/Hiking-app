@@ -295,7 +295,17 @@ const MapScreen = () => {
         onValueChange={(itemValue) => {
           setSelectedPathId(itemValue);
           const selected = savedPaths.find((p) => p.id === itemValue);
-          setSelectedPathCoords(selected?.routePath || []);
+          setSelectedPathCoords(selected?.path || []);
+          if (selected?.path?.length) {
+            const midIndex = Math.floor(selected.path.length / 2);
+            const midPoint = selected.path[midIndex];
+            setPosition({
+              latitude: midPoint.latitude,
+              longitude: midPoint.longitude,
+              latitudeDelta: 0.1,
+              longitudeDelta: 0.1,
+            });
+          }
         }}
         style={styles.picker}
       >
@@ -355,6 +365,15 @@ const MapScreen = () => {
         {waypoints.length > 1 && (
           <Polyline coordinates={routePath} strokeWidth={4} strokeColor="green" />
         )}
+
+        
+      {selectedPathCoords.length > 0 && (
+        <Polyline
+          coordinates={selectedPathCoords}
+          strokeWidth={4}
+          strokeColor="green"
+          />
+      )}
       </MapView>
 
       {/* Show input field and save button only when adding mode is active */}

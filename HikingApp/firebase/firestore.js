@@ -101,7 +101,15 @@ export const getPublicRoutes = async () => {
     try {
         const publicRef = collection(db, "routes");
         const querySnapshot = await getDocs(publicRef);
-        return querySnapshot.docs.map((doc) => ({ name: doc.name, ...doc.data() }));
+        return querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name || "Unnamed Route",
+              path: data.path || [],
+              waypoints: data.waypoints || []
+            };
+          });
     } catch (error) {
         console.error("Error getting public paths: ", error)
         throw error;
