@@ -29,6 +29,14 @@ const HomeScreen = ({ navigation }) => {
 
             <Button
             mode="contained"
+            onPress={() => navigation.navigate("Paths")}
+            style={styles.button}
+            >
+              Reitit
+            </Button>
+
+            <Button
+            mode="contained"
             onPress={() => navigation.navigate("ProfileScreen")}
             style={styles.button}
             >

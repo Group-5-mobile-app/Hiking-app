@@ -9,7 +9,7 @@ import { savePath, getUserPaths, getPublicRoutes } from "../firebase/firestore";
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 
-const SERVER_URL = "http://192.168.1.106:5000";
+const SERVER_URL = "http://192.168.x.x:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
   
 const AVAILABLE_TYPES = [
@@ -17,6 +17,11 @@ const AVAILABLE_TYPES = [
   "Päivätupa", "Kammi", "Sauna", "Ruokailukatos", "Lintutorni",
   "Nähtävyys", "Luola", "Lähde"
 ]; // Filter options
+
+const iconMap = {
+  Nuotiopaikka: require("../assets/icons/nuotiopaikka.png"),
+  Laavu: require("../assets/icons/laavu.png"),
+};
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
@@ -188,6 +193,10 @@ const MapScreen = () => {
     }
   };
 
+  const getMarkerIcon = (type) => {
+    return iconMap[type];
+  };
+
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radius of Earth in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -221,6 +230,19 @@ const MapScreen = () => {
     debounceTimeout.current = setTimeout(() => {
       setDebouncedRadius(value); // Update debounced value after a delay
     }, 500); // 500ms delay
+  };
+
+  const calculateDistance = (coordinates) => {
+    let total = 0;
+    for (let i = 1; i < coordinates.length; i++) {
+      total += getDistanceFromLatLonInKm(
+        coordinates[i - 1].latitude,
+        coordinates[i - 1].longitude,
+        coordinates[i].latitude,
+        coordinates[i].longitude
+      );
+    }
+    return total * 1000;
   };
 
   return (
@@ -319,6 +341,7 @@ const MapScreen = () => {
               coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
               title={stop.nimi}
               description={`Type: ${stop.tyyppi}`}
+              image={getMarkerIcon(stop.tyyppi)}
             />
           );
         })}
@@ -347,7 +370,8 @@ const MapScreen = () => {
             mode="contained" 
             onPress={async () => {
               await fetchRoute();
-              savePath(routeName, routePath);
+              const lengthInMeters = calculateDistance(routePath);
+              await savePath(routeName, lengthInMeters, routePath);
               setIsAdding(false);
             }} 
             style={styles.saveButton}
