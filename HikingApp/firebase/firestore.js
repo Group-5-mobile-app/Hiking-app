@@ -2,23 +2,28 @@ import { getAuth } from 'firebase/auth';
 import { db } from './firebaseConfig';
 import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, firestore, serverTimestamp, query, orderBy } from 'firebase/firestore'
 
-export const saveRoute = async (uid, routeData) => {
+//Here the route data needs to be replaced with what is needed to be saved
+export const saveRoute = async (routeData) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
     try {
-        const routeRef = collection(db, `user/${uid}/routes`);
-        const docRef = await addDoc(routeRef, {
+        const routeRef = collection(db, `user/${user.uid}/routes`);
+        await addDoc(routeRef, {
             ...routeData,
             createdAt: serverTimestamp()
         });
-        return docRef.id;
+        return true;
     } catch (error) {
         console.error("Error saving route: ", error);
-        throw error;
+        return false;
     }
 };
 
-export const getUserRoutes = async (user_id) => {
+export const getUserRoutes = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
     try {
-        const routesRef = collection(db, `user/${user_id}/routes`);
+        const routesRef = collection(db, `user/${user.uid}/routes`);
         const querySnapshot = await getDocs(routesRef);
         return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
