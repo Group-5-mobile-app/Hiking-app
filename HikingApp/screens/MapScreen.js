@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { View, StyleSheet, Alert, FlatList, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker, UrlTile, Polyline } from "react-native-maps";
-import { Button, TextInput } from "react-native-paper";
+import { Button, TextInput, Checkbox } from "react-native-paper";
 import * as Location from 'expo-location'
 import { Ionicons } from "@expo/vector-icons";
-import { savePath } from "../firebase/firestore";
-import { Checkbox } from "react-native-paper";
+import { getAuth } from 'firebase/auth';
+import { savePath, getUserPaths, getPublicRoutes } from "../firebase/firestore";
 import Slider from '@react-native-community/slider';
+import { Picker } from '@react-native-picker/picker';
 
 const SERVER_URL = "http://192.168.x.x:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
@@ -24,16 +25,20 @@ const iconMap = {
 
 const MapScreen = () => {
   const [restStops, setRestStops] = useState([]);
+  const [position, setPosition] = useState(null);
   const [waypoints, setWaypoints] = useState([]);
   const [routePath, setRoutePath] = useState([]);
   const [routeName, setRouteName] = useState("");
   const [isAdding, setIsAdding] = useState(false); 
   const [filteredStops, setFilteredStops] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([""]); // Default type
-  const [position, setPosition] = useState(null);
   const [showFilters, setShowFilters] = useState(false); // Toggle filter visibility
   const [radius, setRadius] = useState(50); // radius in kilometers
   const [debouncedRadius, setDebouncedRadius] = useState(50); // for debounced radius
+
+  const [savedPaths, setSavedPaths] = useState([]);
+  const [selectedPathId, setSelectedPathId] = useState(null);
+  const [selectedPathCoords, setSelectedPathCoords] = useState([]);
   
   const debounceTimeout = useRef(null);
   
@@ -109,7 +114,21 @@ const MapScreen = () => {
     if (position && restStops.length && debouncedRadius) {
       filterStops(restStops, selectedTypes, position, debouncedRadius);
     }
-  }, [restStops, selectedTypes, position, debouncedRadius]);  
+  }, [restStops, selectedTypes, position, debouncedRadius]);
+
+  useEffect(() => {
+    const fetchPaths = async () => {
+      try {
+        const paths = await getPublicRoutes();
+        setSavedPaths(paths);
+      } catch (error) {
+        console.error("Failed to load paths: ", error)
+      }
+    };
+
+    fetchPaths();
+  }, [])
+  
 
   const fetchRestStops = async () => {
     try {
@@ -270,6 +289,22 @@ const MapScreen = () => {
         </View>
       )}
 
+      {/* Filter dropdown */}
+      <Picker
+        selectedValue={selectedPathId}
+        onValueChange={(itemValue) => {
+          setSelectedPathId(itemValue);
+          const selected = savedPaths.find((p) => p.id === itemValue);
+          setSelectedPathCoords(selected?.routePath || []);
+        }}
+        style={styles.picker}
+      >
+        <Picker.Item label="Valitse tallennettu reitti" value={null} />
+        {savedPaths.map((path) => (
+          <Picker.Item key={path.name} label={path.name} value={path.id} />
+        ))}
+      </Picker>
+
       <MapView
         style={styles.map}
         region={position || {
@@ -424,16 +459,21 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     backgroundColor: "#fff",
     borderRadius: 10,
-  },
-  
+  },  
   sliderLabel: {
     fontSize: 16,
     marginBottom: 5,
-  },
-  
+  },  
   slider: {
     width: "100%",
     height: 40,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    backgroundColor: '#f0f0f0',
+    marginVertical: 10,
+    zIndex: 9,
   },
   map: {
     ...StyleSheet.absoluteFillObject,

@@ -96,3 +96,14 @@ export const deleteDocument = async (path, docId) => {
         throw error;
     }
 };
+
+export const getPublicRoutes = async () => {
+    try {
+        const publicRef = collection(db, "routes");
+        const querySnapshot = await getDocs(publicRef);
+        return querySnapshot.docs.map((doc) => ({ name: doc.name, ...doc.data() }));
+    } catch (error) {
+        console.error("Error getting public paths: ", error)
+        throw error;
+    }
+}
