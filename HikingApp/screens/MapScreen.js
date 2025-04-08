@@ -8,7 +8,7 @@ import { savePath } from "../firebase/firestore";
 import { Checkbox } from "react-native-paper";
 import Slider from '@react-native-community/slider';
 
-const SERVER_URL = "http://192.168.1.106:5000"; // here is your local IP address
+const SERVER_URL = "http://192.168.x.x:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
   
 const AVAILABLE_TYPES = [
