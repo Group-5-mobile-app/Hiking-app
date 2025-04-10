@@ -4,6 +4,8 @@ import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconBut
 import { auth, db } from "../firebase/firebaseConfig";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
 import theme from "../components/theme";
+import { useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
@@ -16,6 +18,10 @@ const ProfileScreen = ({ navigation }) => {
     
     const [friendEmail, setFriendEmail] = useState("");
     const [selectedFriend, setSelectedFriend] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [errorDialogVisible, setErrorDialogVisible] = useState(false);
+
+    const { i18n, t } = useTranslation();
 
     useEffect(() => {
         if (auth.currentUser) {
@@ -28,6 +34,11 @@ const ProfileScreen = ({ navigation }) => {
             fetchFriends();
         }
     }, []);
+
+    const handleLanguageChange = async (lang) => {
+        await AsyncStorage.setItem('language', lang);
+        i18n.changeLanguage(lang);
+    };
 
     const fetchFriends = async () => {
         setLoading(true);
@@ -72,7 +83,7 @@ const ProfileScreen = ({ navigation }) => {
 
     const handleAddFriend = async () => {
         if (!friendEmail.trim()) {
-            setErrorMessage("Sähköposti on tyhjä");
+            setErrorMessage(t("profile.add_friend.empty_email"));
             setErrorDialogVisible(true);
             return;
         }
@@ -85,7 +96,7 @@ const ProfileScreen = ({ navigation }) => {
             const querySnapshot = await getDocs(q);
             
             if (querySnapshot.empty) {
-                setErrorMessage("Käyttäjää ei löydy");
+                setErrorMessage(t("profile.add_friend.user_not_found"));
                 setErrorDialogVisible(true);
                 return;
             }
@@ -97,7 +108,7 @@ const ProfileScreen = ({ navigation }) => {
             const userRef = doc(db, "user", auth.currentUser.uid);
             const userDoc = await getDoc(userRef);
             if (userDoc.exists() && userDoc.data().friends && userDoc.data().friends.includes(friendId)) {
-                setErrorMessage("Käyttäjä on jo kaverisi");
+                setErrorMessage(t("profile.add_friend.already_friend"));
                 setErrorDialogVisible(true);
                 return;
             }
@@ -119,7 +130,7 @@ const ProfileScreen = ({ navigation }) => {
             
         } catch (error) {
             console.error("Error adding friend:", error);
-            setErrorMessage("Virhe kaverin lisäämisessä");
+            setErrorMessage(t("profile.add_friend.error"));
             setErrorDialogVisible(true);
         }
     };
@@ -140,7 +151,7 @@ const ProfileScreen = ({ navigation }) => {
             
         } catch (error) {
             console.error("Error removing friend:", error);
-            setErrorMessage("Virhe ystävän poistamisessa");
+            setErrorMessage(t("profile.remove_friend.error"));
             setErrorDialogVisible(true);
         }
     };
@@ -183,15 +194,15 @@ const ProfileScreen = ({ navigation }) => {
                             <View style={styles.statsContainer}>
                                 <View style={styles.statItem}>
                                     <Text style={styles.statValue}>{userStats.totalDistance} km</Text>
-                                    <Text style={styles.statLabel}>Kuljettu</Text>
+                                    <Text style={styles.statLabel}>{t("distance")}</Text>
                                 </View>
                                 <View style={styles.statItem}>
                                     <Text style={styles.statValue}>{userStats.totalSteps}</Text>
-                                    <Text style={styles.statLabel}>Askelia</Text>
+                                    <Text style={styles.statLabel}>{t("steps")}</Text>
                                 </View>
                                 <View style={styles.statItem}>
                                     <Text style={styles.statValue}>{userStats.totalRoutes}</Text>
-                                    <Text style={styles.statLabel}>Reittejä</Text>
+                                    <Text style={styles.statLabel}>{t("routes")}</Text>
                                 </View>
                             </View>
                         </Card.Content>
@@ -200,12 +211,9 @@ const ProfileScreen = ({ navigation }) => {
                     {/* Bio Card */}
                     <Card style={styles.bioCard}>
                         <Card.Content>
-                            <Text style={styles.cardTitle}>Tietoa minusta</Text>
+                            <Text style={styles.cardTitle}>{t("profile.about_me")}</Text>
                             <Text style={styles.bioText}>
-                                Hei! Olen innokas vaeltaja ja luonnon ystävä. Pidän erityisesti 
-                                vuoristoreiteistä ja uusien polkujen löytämisestä. Olen vaeltanut 
-                                Suomessa useilla eri reiteillä ja tavoitteenani on tutustua 
-                                kaikkiin kansallispuistoihin.
+                                {t("profile.about_me_placeholder")}
                             </Text>
                         </Card.Content>
                     </Card>
@@ -213,7 +221,7 @@ const ProfileScreen = ({ navigation }) => {
                     {/* Routes Card */}
                     <Card style={styles.routesCard}>
                         <Card.Content>
-                            <Text style={styles.cardTitle}>Omat Reitit</Text>
+                            <Text style={styles.cardTitle}>{t("profile.my_routes")}</Text>
                             
                             {routes.map((route) => (
                                 <View key={route.id} style={styles.routeItem}>
@@ -234,7 +242,7 @@ const ProfileScreen = ({ navigation }) => {
                     <Card style={styles.friendsCard}>
                         <Card.Content>
                             <View style={styles.cardHeaderRow}>
-                                <Text style={styles.cardTitle}>Kaverit</Text>
+                                <Text style={styles.cardTitle}>{t("profile.friends")}</Text>
                                 <IconButton
                                     icon="plus"
                                     size={24}
@@ -244,7 +252,7 @@ const ProfileScreen = ({ navigation }) => {
                             </View>
                             
                             {!loading && friends.length === 0 ? (
-                                <Text style={styles.emptyListText}>Ei vielä kavereita.</Text>
+                                <Text style={styles.emptyListText}>{t("profile.no_friends")}</Text>
                             ) : (
                                 friends.map((friend) => (
                                     <View key={friend.id} style={styles.friendItem}>
@@ -255,7 +263,7 @@ const ProfileScreen = ({ navigation }) => {
                                         />
                                         <View style={styles.friendInfo}>
                                             <Text style={styles.friendName}>{friend.name}</Text>
-                                            <Text style={styles.friendStats}>{friend.trails} reittiä</Text>
+                                            <Text style={styles.friendStats}>{friend.trails} {t("profile.trails")}</Text>
                                         </View>
                                         <IconButton
                                             icon="close"
@@ -269,6 +277,16 @@ const ProfileScreen = ({ navigation }) => {
                                     </View>
                                 ))
                             )}
+                        </Card.Content>
+                    </Card>
+
+                    <Card style={styles.languageCard}>
+                        <Card.Content>
+                            <Text style={styles.cardTitle}>{t("set_language")}</Text>
+                            <View style={styles.languageButtons}>
+                                <Button mode="contained" onPress={() => handleLanguageChange("fi")}>{t("finnish")}</Button>
+                                <Button mode="contained" onPress={() => handleLanguageChange("en")}>{t("english")}</Button>
+                            </View>
                         </Card.Content>
                     </Card>
                 </View>
@@ -286,55 +304,75 @@ const ProfileScreen = ({ navigation }) => {
                     onRemove={handleRemoveFriend}
                     friend={selectedFriend}
                 />
+                
+                <Portal>
+                    <Dialog visible={errorDialogVisible} onDismiss={() => setErrorDialogVisible(false)}>
+                        <Dialog.Title>{t("error")}</Dialog.Title>
+                        <Dialog.Content>
+                            <Text>{errorMessage}</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => setErrorDialogVisible(false)}>{t("ok")}</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
             </ScrollView>
         </>
     );
 };
 
-const AddFriendDialog = ({ visible, onDismiss, onAdd, email, onChangeEmail }) => (
-    <Portal>
-        <Dialog visible={visible} onDismiss={onDismiss}>
-            <Dialog.Title>Lisää kaveri</Dialog.Title>
-            <Dialog.Content>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    keyboardVerticalOffset={100}
-                >
-                    <TextInput
-                        label="Kaverin sähköposti"
-                        value={email}
-                        onChangeText={onChangeEmail}
-                        mode="outlined"
-                        style={{ marginBottom: 10, backgroundColor: theme.colors.text}}
-                        autoComplete="off"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        returnKeyType="done"
-                    />
-                </KeyboardAvoidingView>
-            </Dialog.Content>
-            <Dialog.Actions>
-                <Button onPress={onDismiss}>Peruuta</Button>
-                <Button onPress={onAdd}>Lisää</Button>
-            </Dialog.Actions>
-        </Dialog>
-    </Portal>
-);
+const AddFriendDialog = ({ visible, onDismiss, onAdd, email, onChangeEmail }) => {
+    const { t } = useTranslation();
+    
+    return (
+        <Portal>
+            <Dialog visible={visible} onDismiss={onDismiss}>
+                <Dialog.Title>{t("profile.add_friend.title")}</Dialog.Title>
+                <Dialog.Content>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        keyboardVerticalOffset={100}
+                    >
+                        <TextInput
+                            label={t("profile.add_friend.email_label")}
+                            value={email}
+                            onChangeText={onChangeEmail}
+                            mode="outlined"
+                            style={{ marginBottom: 10, backgroundColor: theme.colors.text}}
+                            autoComplete="off"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            returnKeyType="done"
+                        />
+                    </KeyboardAvoidingView>
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button onPress={onDismiss}>{t("profile.add_friend.cancel")}</Button>
+                    <Button onPress={onAdd}>{t("profile.add_friend.add")}</Button>
+                </Dialog.Actions>
+            </Dialog>
+        </Portal>
+    );
+};
 
-const RemoveFriendDialog = ({ visible, onDismiss, onRemove, friend }) => (
-    <Portal>
-        <Dialog visible={visible} onDismiss={onDismiss}>
-            <Dialog.Title>Poista kaveri</Dialog.Title>
-            <Dialog.Content>
-                <Text>Haluatko varmasti poistaa kaverin {friend?.name || friend?.email}?</Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-                <Button onPress={onDismiss}>Peruuta</Button>
-                <Button onPress={onRemove}>Poista</Button>
-            </Dialog.Actions>
-        </Dialog>
-    </Portal>
-);
+const RemoveFriendDialog = ({ visible, onDismiss, onRemove, friend }) => {
+    const { t } = useTranslation();
+    
+    return (
+        <Portal>
+            <Dialog visible={visible} onDismiss={onDismiss}>
+                <Dialog.Title>{t("profile.remove_friend.title")}</Dialog.Title>
+                <Dialog.Content>
+                    <Text>{t("profile.remove_friend.confirm", { name: friend?.name || friend?.email })}</Text>
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button onPress={onDismiss}>{t("profile.remove_friend.cancel")}</Button>
+                    <Button onPress={onRemove}>{t("profile.remove_friend.remove")}</Button>
+                </Dialog.Actions>
+            </Dialog>
+        </Portal>
+    );
+};
 
 const styles = StyleSheet.create({
     scrollContainer: {
@@ -483,6 +521,18 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginTop: 10,
         marginBottom: 20,
+    },
+    languageCard: {
+        width: "100%",
+        marginBottom: 20,
+        marginTop: 20,
+        backgroundColor: theme.colors.primary,
+        color: theme.colors.text
+    },
+    languageButtons: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        gap: 10,
     },
 });
 

@@ -1,0 +1,35 @@
+{
+    "distance": "Kuljettu",
+    "steps": "Askelia",
+    "routes": "Reittejä",
+    "set_language": "Vaihda Kieli",
+    "finnish": "Suomi",
+    "english": "Englanti",
+    "error": "Virhe",
+    "ok": "OK",
+    "profile": {
+        "about_me": "Tietoa minusta",
+        "about_me_placeholder": "Tähän käyttäjän oma kuvaus?",
+        "my_routes": "Omat Reitit",
+        "friends": "Kaverit",
+        "no_friends": "Ei vielä kavereita.",
+        "trails": "reittiä",
+        "add_friend": {
+            "title": "Lisää kaveri",
+            "email_label": "Kaverin sähköposti",
+            "cancel": "Peruuta",
+            "add": "Lisää",
+            "empty_email": "Sähköposti on tyhjä",
+            "user_not_found": "Käyttäjää ei löydy",
+            "already_friend": "Käyttäjä on jo kaverisi",
+            "error": "Virhe kaverin lisäämisessä"
+        },
+        "remove_friend": {
+            "title": "Poista kaveri",
+            "confirm": "Haluatko varmasti poistaa kaverin {{name}}?",
+            "cancel": "Peruuta",
+            "remove": "Poista",
+            "error": "Virhe ystävän poistamisessa"
+        }
+    }
+}

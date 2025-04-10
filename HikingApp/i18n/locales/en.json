@@ -1,0 +1,35 @@
+{
+    "distance": "Distance",
+    "steps": "Steps",
+    "routes": "Routes",
+    "set_language": "Set Language",
+    "finnish": "Finnish",
+    "english": "English",
+    "error": "Error",
+    "ok": "OK",
+    "profile": {
+        "about_me": "About Me",
+        "about_me_placeholder": "Your description here?",
+        "my_routes": "My Routes",
+        "friends": "Friends",
+        "no_friends": "No friends yet.",
+        "trails": "trails",
+        "add_friend": {
+            "title": "Add Friend",
+            "email_label": "Friend's Email",
+            "cancel": "Cancel",
+            "add": "Add",
+            "empty_email": "Email is empty",
+            "user_not_found": "User not found",
+            "already_friend": "User is already your friend",
+            "error": "Error adding friend"
+        },
+        "remove_friend": {
+            "title": "Remove Friend",
+            "confirm": "Are you sure you want to remove {{name}}?",
+            "cancel": "Cancel",
+            "remove": "Remove",
+            "error": "Error removing friend"
+        }
+    }
+}
