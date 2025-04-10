@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { FlatList, StyleSheet, View, TouchableOpacity } from "react-native";
 import { Appbar, Button, Card, Snackbar, TextInput, Text } from "react-native-paper";
 import { savePath } from "../firebase/firestore";
+import { getUserPaths } from "../firebase/firestore";
 
 
 const PathScreen = ({ navigation }) => {
@@ -9,11 +10,19 @@ const PathScreen = ({ navigation }) => {
     const [name, setName] = useState("");
     const [length, setLength] = useState("");
     const [message, setMessage] = useState("");
+    const [paths, setPaths] = useState([]);
 
-    const paths = [
-        { id: "1", name: "MetsäPolku", length: "10km" },
-        { id: "2", name: "MaastoPolku", length: "15km" },
-    ];
+    useEffect(() => {
+        const loadPaths = async () => {
+            try {
+                const fetchedPaths = await getUserPaths();
+                setPaths(fetchedPaths);
+            } catch (error) {
+                console.error("Error loading paths", err);
+            }
+        };
+        loadPaths();
+    }, []);
 
     const handleSavePath = async () => {
         if (!name || !length) {
@@ -32,6 +41,18 @@ const PathScreen = ({ navigation }) => {
         }
     };
 
+    const formatDistance = (length) => {
+        if (!length || isNaN(length)) return "–";
+        const km = length / 1000;
+        return km < 1 ? `${length.toFixed(0)} m` : `${km.toFixed(2)} km`;
+    };
+
+    const formatDate = (timestampInSeconds) => {
+        if (!timestampInSeconds) return "";
+        const date = new Date(timestampInSeconds * 1000);
+        return date.toLocaleDateString();
+    }
+
     return (
         <View style={styles.container}>
             <Appbar.Header style={styles.appbar}>
@@ -42,20 +63,24 @@ const PathScreen = ({ navigation }) => {
             {viewMode === "list" ? (
                 <>
                 <Text style={styles.title}>Valmiit Reitit</Text>
-                <FlatList 
+                <FlatList
                     data={paths}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({item}) => (
+                    keyExtractor={(item) => item.id || item.name}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => navigation.navigate("PathDetail", { path: item })}>
                         <Card style={styles.card}>
                             <Card.Content>
-                                <Text style={styles.pathName}>{item.name}</Text>
-                                <Text style={styles.pathDetails}>{item.length}</Text>
+                            <Text style={styles.pathName}>{item.name}</Text>
+                            <Text style={styles.pathDetails}>
+                                {formatDistance(item.length)} - {formatDate(item.createdAt?.seconds)}
+                            </Text>
                             </Card.Content>
                         </Card>
+                        </TouchableOpacity>
                     )}
                 />
 
-                <Button mode="contained" style={styles.button} onPress={() => setViewMode("add")}>
+                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta",)}>
                     Lisää Reitti
                 </Button>
                 </>

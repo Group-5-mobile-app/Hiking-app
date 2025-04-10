@@ -1,24 +1,29 @@
 import { getAuth } from 'firebase/auth';
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, Firestore, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, firestore, serverTimestamp, query, orderBy } from 'firebase/firestore'
 
-export const saveRoute = async (user_id, routeData) => {
+//Here the route data needs to be replaced with what is needed to be saved
+export const saveRoute = async (routeData) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
     try {
-        const routeRef = collection(db, `user/${user_id}/saved/routes`);
-        const docRef = await addDoc(routeRef, {
+        const routeRef = collection(db, `user/${user.uid}/routes`);
+        await addDoc(routeRef, {
             ...routeData,
             createdAt: serverTimestamp()
         });
-        return docRef.id;
+        return true;
     } catch (error) {
         console.error("Error saving route: ", error);
-        throw error;
+        return false;
     }
 };
 
-export const getUserRoutes = async (user_id) => {
+export const getUserRoutes = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
     try {
-        const routesRef = collection(db, `user/${user_id}/saved/routes`);
+        const routesRef = collection(db, `user/${user.uid}/routes`);
         const querySnapshot = await getDocs(routesRef);
         return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
@@ -27,17 +32,19 @@ export const getUserRoutes = async (user_id) => {
     }
 };
 
-export const savePath = async (name, length) => {
+export const savePath = async (name, length, routePath) => {
     const auth = getAuth();
     const user = auth.currentUser;
 
     if (!user) throw new Error("Kirjaudu sisään luodaksesi reittejä.");
 
     try {
-        const pathRef = collection(firestore, `user/${user.uid}/saved/paths`);
+        const pathRef = collection(db, `user/${user.uid}/paths`);
+
         await addDoc(pathRef, {
             name,
             length,
+            routePath,
             createdAt: serverTimestamp()
         });
         return true;
@@ -47,11 +54,21 @@ export const savePath = async (name, length) => {
     }
 };
 
-export const getUserPaths = async (user_id) => {
+export const getUserPaths = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) throw new Error("Kirjaudu sisään luodaksesi reittejä.");
+
     try {
-        const pathsRef = collection(db, `user/ ${user_id}/saved/paths`);
-        const querySnapshot = await getDocs(pathsRef);
-        return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const pathsRef = collection(db, `user/${user.uid}/paths`);
+        const q = query(pathsRef, orderBy("createdAt", "desc"));
+
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
     } catch (error) {
         console.error("Error fetching paths: ", error);
         throw error;
@@ -79,3 +96,22 @@ export const deleteDocument = async (path, docId) => {
         throw error;
     }
 };
+
+export const getPublicRoutes = async () => {
+    try {
+        const publicRef = collection(db, "routes");
+        const querySnapshot = await getDocs(publicRef);
+        return querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name || "Unnamed Route",
+              path: data.path || [],
+              waypoints: data.waypoints || []
+            };
+          });
+    } catch (error) {
+        console.error("Error getting public paths: ", error)
+        throw error;
+    }
+}

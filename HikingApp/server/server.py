@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-ORS_API_KEY = "your_key"
+ORS_API_KEY = "xx"
 
 @app.route("/get_route", methods=["POST"])
 def get_route():
@@ -29,4 +29,4 @@ def get_route():
         return jsonify({"error": "Route request failed", "details": response.text}), 500
     
 if __name__ == "__main__":
-    app.run(host="localhost", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
