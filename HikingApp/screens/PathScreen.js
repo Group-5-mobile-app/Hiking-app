@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, View, TouchableOpacity } from "react-native";
 import { Appbar, Button, Card, Snackbar, TextInput, Text } from "react-native-paper";
 import { savePath } from "../firebase/firestore";
 import { getUserPaths } from "../firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 
 const PathScreen = ({ navigation }) => {
@@ -11,6 +12,7 @@ const PathScreen = ({ navigation }) => {
     const [length, setLength] = useState("");
     const [message, setMessage] = useState("");
     const [paths, setPaths] = useState([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const loadPaths = async () => {
@@ -62,7 +64,7 @@ const PathScreen = ({ navigation }) => {
 
             {viewMode === "list" ? (
                 <>
-                <Text style={styles.title}>Valmiit Reitit</Text>
+                <Text style={styles.title}>{t("path.routes")}</Text>
                 <FlatList
                     data={paths}
                     keyExtractor={(item) => item.id || item.name}
@@ -80,32 +82,32 @@ const PathScreen = ({ navigation }) => {
                     )}
                 />
 
-                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta")}>
-                    Lisää Reitti
+                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta",)}>
+                    {t("path.add_route")}
                 </Button>
                 </>
             ) : (
                 <>
-                    <Text style={styles.title}>Lisää Oma Reitti</Text>
+                    <Text style={styles.title}>{t("path.add_route")}</Text>
                     <TextInput 
                         mode="outlined"
-                        label="Reitin nimi"
+                        label={t("path.name")}
                         value={name}
                         onChangeText={setName}
                     />
                     <TextInput
                         mode="outlined"
-                        label="pituus"
+                        label={t("path.length")}
                         keyboardType="numeric"
                         value={length}
                         onChangeText={setLength}
                     />
 
                     <Button mode="contained" style={styles.button} onPress={handleSavePath}>
-                        Tallenna Reitti
+                        {t("path.save_route")}
                     </Button>
                     <Button mode="outlined" style={styles.button} onPress={() => setViewMode("list")}>
-                        Takaisin
+                        {t("path.back")}
                     </Button>
                     <Snackbar visible={!!message} onDismiss={() => setMessage("")}>
                         {message}
