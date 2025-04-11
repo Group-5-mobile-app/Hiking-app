@@ -441,7 +441,7 @@ const MapScreen = () => {
         </View>
       )}
 
-      {/* Floating Action Button */}
+      {/* Tänne lisätään routeTracking */}
       <TouchableOpacity style={styles.fab} onPress={toggleAddRoute}>
         <Ionicons name={isAdding ? "close" : "add"} size={30} color="white" />
       </TouchableOpacity>
