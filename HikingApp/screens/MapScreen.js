@@ -8,14 +8,15 @@ import { getAuth } from 'firebase/auth';
 import { savePath, getUserPaths, getPublicRoutes } from "../firebase/firestore";
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
 
 const SERVER_URL = "http://192.168.x.x:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
   
-const AVAILABLE_TYPES = [
-  "Nuotiopaikka", "Laavu", "Kota", "Varaustupa", "Autiotupa", "Porokämppä",
-  "Päivätupa", "Kammi", "Sauna", "Ruokailukatos", "Lintutorni",
-  "Nähtävyys", "Luola", "Lähde"
+const TYPE_KEYS = [ // englanti käännöksiä puuttuu näistä!! en ite osaa kääntää t. aleksi
+  "map.types.nuotiopaikka", "map.types.laavu", "map.types.kota", "map.types.varaustupa", "map.types.autiotupa", "map.types.porokamppa",
+  "map.types.paivatupa", "map.types.kammi", "map.types.sauna", "map.types.ruokailukatos", "map.types.lintutorni",
+  "map.types.nahtavyys", "map.types.luola", "map.types.lahde" 
 ]; // Filter options
 
 const iconMap = {
@@ -35,12 +36,15 @@ const MapScreen = () => {
   const [showFilters, setShowFilters] = useState(false); // Toggle filter visibility
   const [radius, setRadius] = useState(50); // radius in kilometers
   const [debouncedRadius, setDebouncedRadius] = useState(50); // for debounced radius
-
   const [savedPaths, setSavedPaths] = useState([]);
   const [selectedPathId, setSelectedPathId] = useState(null);
   const [selectedPathCoords, setSelectedPathCoords] = useState([]);
+  const [activeTab, setActiveTab] = useState("Filters");
   
   const debounceTimeout = useRef(null);
+
+  const { t } = useTranslation();
+  const AVAILABLE_TYPES = TYPE_KEYS.map(key => t(key));
   
   const toggleAddRoute = () => {
     setIsAdding(!isAdding);
@@ -249,71 +253,98 @@ const MapScreen = () => {
     <View style={styles.container}>
       {/* Toggle Button to Show/Hide Filters */}
       <TouchableOpacity style={styles.toggleButton} onPress={() => setShowFilters(!showFilters)}>
-        <Text style={styles.toggleButtonText}>{showFilters ? "Hide Filters" : "Show Filters"}</Text>
+        <Text style={styles.toggleButtonText}>{showFilters ? t("map.hide_filters") : t("map.show_filters")}</Text>
       </TouchableOpacity>
 
       {/* Conditional Rendering for Filters */}
       {showFilters && (
         <View style={styles.filterContainer}>
-          <View style={styles.checkboxGrid}>
-            {AVAILABLE_TYPES.map((item) => (
-              <TouchableOpacity
-                key={item}
-                style={[
-                  styles.checkboxWrapper,
-                  selectedTypes.includes(item) && styles.checkboxWrapperSelected,
-                ]}
-                onPress={() => toggleType(item)}
-              >
-                <Checkbox
-                  status={selectedTypes.includes(item) ? "checked" : "unchecked"}
-                  onPress={() => toggleType(item)}
-                />
-                <Text style={styles.checkboxLabel}>{item}</Text>
-              </TouchableOpacity>
-            ))}
+          {/* Tab Buttons */}
+          <View style={styles.tabBar}>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === "filters" && styles.activeTab,
+              ]}
+              onPress={() => setActiveTab("filters")}
+            >
+              <Text style={styles.tabText}>{t("map.filters")}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === "reitit" && styles.activeTab,
+              ]}
+              onPress={() => setActiveTab("reitit")}
+            >
+              <Text style={styles.tabText}>{t("map.routes")}</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Radius Slider */}
-          <View style={styles.sliderContainer}>
-            <Text style={styles.sliderLabel}>Radius: {radius} km</Text>
-            <Slider
-              minimumValue={1}
-              maximumValue={200}
-              step={1}
-              //value={radius}
-              onValueChange={handleRadiusChange}
-              style={styles.slider}
-            />
-          </View>
+          {/* Tab Content */}
+          {activeTab === "filters" ? (
+            <>
+              <View style={styles.checkboxGrid}>
+                {AVAILABLE_TYPES.map((item) => (
+                  <TouchableOpacity
+                    key={item}
+                    style={[
+                      styles.checkboxWrapper,
+                      selectedTypes.includes(item) && styles.checkboxWrapperSelected,
+                    ]}
+                    onPress={() => toggleType(item)}
+                  >
+                    <Checkbox
+                      status={selectedTypes.includes(item) ? "checked" : "unchecked"}
+                      onPress={() => toggleType(item)}
+                    />
+                    <Text style={styles.checkboxLabel}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.sliderContainer}>
+                <Text style={styles.sliderLabel}>{t("map.radius")}: {radius} km</Text>
+                <Slider
+                  minimumValue={1}
+                  maximumValue={200}
+                  step={1}
+                  onValueChange={handleRadiusChange}
+                  style={styles.slider}
+                />
+              </View>
+            </>
+          ) : (
+            <View style={{ paddingHorizontal: 10 }}>
+              <Text style={styles.sliderLabel}>{t("map.select_saved_route")}:</Text>
+              <Picker
+                selectedValue={selectedPathId}
+                onValueChange={(itemValue) => {
+                  setSelectedPathId(itemValue);
+                  const selected = savedPaths.find((p) => p.id === itemValue);
+                  setSelectedPathCoords(selected?.path || []);
+                  if (selected?.path?.length) {
+                    const midIndex = Math.floor(selected.path.length / 2);
+                    const midPoint = selected.path[midIndex];
+                    setPosition({
+                      latitude: midPoint.latitude,
+                      longitude: midPoint.longitude,
+                      latitudeDelta: 0.1,
+                      longitudeDelta: 0.1,
+                    });
+                  }
+                }}
+                style={styles.picker}
+              >
+                <Picker.Item label={t("map.select_saved_route")} value={null} />
+                {savedPaths.map((path) => (
+                  <Picker.Item key={path.name} label={path.name} value={path.id} />
+                ))}
+              </Picker>
+            </View>
+          )}
         </View>
       )}
-
-      {/* Filter dropdown */}
-      <Picker
-        selectedValue={selectedPathId}
-        onValueChange={(itemValue) => {
-          setSelectedPathId(itemValue);
-          const selected = savedPaths.find((p) => p.id === itemValue);
-          setSelectedPathCoords(selected?.path || []);
-          if (selected?.path?.length) {
-            const midIndex = Math.floor(selected.path.length / 2);
-            const midPoint = selected.path[midIndex];
-            setPosition({
-              latitude: midPoint.latitude,
-              longitude: midPoint.longitude,
-              latitudeDelta: 0.1,
-              longitudeDelta: 0.1,
-            });
-          }
-        }}
-        style={styles.picker}
-      >
-        <Picker.Item label="Valitse tallennettu reitti" value={null} />
-        {savedPaths.map((path) => (
-          <Picker.Item key={path.name} label={path.name} value={path.id} />
-        ))}
-      </Picker>
 
       <MapView
         style={styles.map}
@@ -381,7 +412,7 @@ const MapScreen = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter Route Name"
+            placeholder={t("map.enter_route_name")}
             value={routeName}
             onChangeText={setRouteName}
           />
@@ -395,7 +426,7 @@ const MapScreen = () => {
             }} 
             style={styles.saveButton}
             >
-            Save Path
+            {t("map.save_path")}
           </Button>
           <Button
           mode="outlined"
@@ -405,7 +436,7 @@ const MapScreen = () => {
           }}
           style={{ marginTop: 10 }}
           >
-            Undo
+            {t("map.undo")}
           </Button>
         </View>
       )}
@@ -528,6 +559,26 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: "#007AFF",
     marginBottom: 5,
+  },
+  tabBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },  
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },  
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#007AFF",
+  },  
+  tabText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#007AFF",
   },
 });
 

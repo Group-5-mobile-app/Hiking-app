@@ -1,0 +1,84 @@
+{
+    "nav": {
+        "home": "Home",
+        "map": "Map",
+        "login": "Login",
+        "signup": "Signup",
+        "profile": "Profile",
+        "setting": "Settings",
+        "paths": "Paths",
+        "pathDetail": "Path Details"
+    },
+    "distance": "Distance",
+    "steps": "Steps",
+    "routes": "Routes",
+    "set_language": "Set Language",
+    "finnish": "Finnish",
+    "english": "English",
+    "error": "Error",
+    "ok": "OK",
+    "profile": {
+        "about_me": "About Me",
+        "about_me_placeholder": "Your description here?",
+        "my_routes": "My Routes",
+        "friends": "Friends",
+        "no_friends": "No friends yet.",
+        "trails": "trails",
+        "add_friend": {
+            "title": "Add Friend",
+            "email_label": "Friend's Email",
+            "cancel": "Cancel",
+            "add": "Add",
+            "empty_email": "Email is empty",
+            "user_not_found": "User not found",
+            "already_friend": "User is already your friend",
+            "error": "Error adding friend"
+        },
+        "remove_friend": {
+            "title": "Remove Friend",
+            "confirm": "Are you sure you want to remove friend?",
+            "cancel": "Cancel",
+            "remove": "Remove",
+            "error": "Error removing friend"
+        }
+    },
+    "map": {
+        "hide_filters": "Hide Filters",
+        "show_filters": "Show Filters",
+        "filters": "Filters",
+        "routes": "Routes",
+        "radius": "Radius",
+        "select_saved_route": "Select Saved Route",
+        "enter_route_name": "Enter Route Name",
+        "save_path": "Save Path",
+        "undo": "Undo",
+        "types": {
+            "nuotiopaikka": "Nuotiopaikka",
+            "laavu": "Laavu",
+            "kota": "Kota",
+            "varaustupa": "Varaustupa",
+            "autiotupa": "Autiotupa",
+            "porokamppa": "Porokämppä",
+            "paivatupa": "Päivätupa",
+            "kammi": "Kammi",
+            "sauna": "Sauna",
+            "ruokailukatos": "Ruokailukatos",
+            "lintutorni": "Lintutorni",
+            "nahtavyys": "Nähtävyys",
+            "luola": "Cave",
+            "lahde": "Spring"
+        }
+    },
+    "path": {
+        "routes": "Saved Routes",
+        "add_route": "Add Route",
+        "name": "Route Name",
+        "length": "Length",
+        "save_route": "Save Route",
+        "back": "Back",
+        "details": {
+            "length": "Length",
+            "created": "Created"
+        }
+    }
+}
