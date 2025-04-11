@@ -29,5 +29,3 @@ def get_route():
     else:
         return jsonify({"error": "Route request failed", "details": response.text}), 500
     
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
