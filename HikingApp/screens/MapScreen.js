@@ -8,14 +8,15 @@ import { getAuth } from 'firebase/auth';
 import { savePath, getUserPaths, getPublicRoutes } from "../firebase/firestore";
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
 
 const SERVER_URL = "http://192.168.x.x:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
   
-const AVAILABLE_TYPES = [
-  "Nuotiopaikka", "Laavu", "Kota", "Varaustupa", "Autiotupa", "Porokämppä",
-  "Päivätupa", "Kammi", "Sauna", "Ruokailukatos", "Lintutorni",
-  "Nähtävyys", "Luola", "Lähde"
+const TYPE_KEYS = [ // englanti käännöksiä puuttuu näistä!! en ite osaa kääntää t. aleksi
+  "map.types.nuotiopaikka", "map.types.laavu", "map.types.kota", "map.types.varaustupa", "map.types.autiotupa", "map.types.porokamppa",
+  "map.types.paivatupa", "map.types.kammi", "map.types.sauna", "map.types.ruokailukatos", "map.types.lintutorni",
+  "map.types.nahtavyys", "map.types.luola", "map.types.lahde" 
 ]; // Filter options
 
 const iconMap = {
@@ -41,6 +42,9 @@ const MapScreen = () => {
   const [activeTab, setActiveTab] = useState("Filters");
   
   const debounceTimeout = useRef(null);
+
+  const { t } = useTranslation();
+  const AVAILABLE_TYPES = TYPE_KEYS.map(key => t(key));
   
   const toggleAddRoute = () => {
     setIsAdding(!isAdding);
@@ -249,7 +253,7 @@ const MapScreen = () => {
     <View style={styles.container}>
       {/* Toggle Button to Show/Hide Filters */}
       <TouchableOpacity style={styles.toggleButton} onPress={() => setShowFilters(!showFilters)}>
-        <Text style={styles.toggleButtonText}>{showFilters ? "Hide Filters" : "Show Filters"}</Text>
+        <Text style={styles.toggleButtonText}>{showFilters ? t("map.hide_filters") : t("map.show_filters")}</Text>
       </TouchableOpacity>
 
       {/* Conditional Rendering for Filters */}
@@ -264,7 +268,7 @@ const MapScreen = () => {
               ]}
               onPress={() => setActiveTab("filters")}
             >
-              <Text style={styles.tabText}>Filters</Text>
+              <Text style={styles.tabText}>{t("map.filters")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
@@ -273,7 +277,7 @@ const MapScreen = () => {
               ]}
               onPress={() => setActiveTab("reitit")}
             >
-              <Text style={styles.tabText}>Reitit</Text>
+              <Text style={styles.tabText}>{t("map.routes")}</Text>
             </TouchableOpacity>
           </View>
 
@@ -300,7 +304,7 @@ const MapScreen = () => {
               </View>
 
               <View style={styles.sliderContainer}>
-                <Text style={styles.sliderLabel}>Radius: {radius} km</Text>
+                <Text style={styles.sliderLabel}>{t("map.radius")}: {radius} km</Text>
                 <Slider
                   minimumValue={1}
                   maximumValue={200}
@@ -312,7 +316,7 @@ const MapScreen = () => {
             </>
           ) : (
             <View style={{ paddingHorizontal: 10 }}>
-              <Text style={styles.sliderLabel}>Valitse tallennettu reitti:</Text>
+              <Text style={styles.sliderLabel}>{t("map.select_saved_route")}:</Text>
               <Picker
                 selectedValue={selectedPathId}
                 onValueChange={(itemValue) => {
@@ -332,7 +336,7 @@ const MapScreen = () => {
                 }}
                 style={styles.picker}
               >
-                <Picker.Item label="Valitse tallennettu reitti" value={null} />
+                <Picker.Item label={t("map.select_saved_route")} value={null} />
                 {savedPaths.map((path) => (
                   <Picker.Item key={path.name} label={path.name} value={path.id} />
                 ))}
@@ -408,7 +412,7 @@ const MapScreen = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter Route Name"
+            placeholder={t("map.enter_route_name")}
             value={routeName}
             onChangeText={setRouteName}
           />
@@ -422,7 +426,7 @@ const MapScreen = () => {
             }} 
             style={styles.saveButton}
             >
-            Save Path
+            {t("map.save_path")}
           </Button>
           <Button
           mode="outlined"
@@ -432,7 +436,7 @@ const MapScreen = () => {
           }}
           style={{ marginTop: 10 }}
           >
-            Undo
+            {t("map.undo")}
           </Button>
         </View>
       )}

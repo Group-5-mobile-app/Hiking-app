@@ -1,4 +1,14 @@
 {
+    "nav": {
+        "home": "Koti",
+        "map": "Kartta",
+        "login": "Kirjaudu",
+        "signup": "Rekisteröidy",
+        "profile": "Profiili",
+        "setting": "Asetukset",
+        "paths": "Reitit",
+        "pathDetail": "Reitin tiedot"
+    },
     "distance": "Kuljettu",
     "steps": "Askelia",
     "routes": "Reittejä",
@@ -26,10 +36,45 @@
         },
         "remove_friend": {
             "title": "Poista kaveri",
-            "confirm": "Haluatko varmasti poistaa kaverin {{name}}?",
+            "confirm": "Haluatko varmasti poistaa kaverin?",
             "cancel": "Peruuta",
             "remove": "Poista",
-            "error": "Virhe ystävän poistamisessa"
+            "error": "Virhe kaverin poistamisessa"
         }
+    },
+    "map": {
+        "hide_filters": "Piilota suodattimet",
+        "show_filters": "Näytä suodattimet",
+        "filters": "Suodattimet",
+        "routes": "Reitit",
+        "radius": "Säde",
+        "select_saved_route": "Valitse tallennettu reitti",
+        "enter_route_name": "Kirjoita reitin nimi",
+        "save_path": "Tallenna reitti",
+        "undo": "Kumoa",
+        "types": {
+            "nuotiopaikka": "Nuotiopaikka",
+            "laavu": "Laavu",
+            "kota": "Kota",
+            "varaustupa": "Varaustupa",
+            "autiotupa": "Autiotupa",
+            "porokamppa": "Porokämppä",
+            "paivatupa": "Päivätupa",
+            "kammi": "Kammi",
+            "sauna": "Sauna",
+            "ruokailukatos": "Ruokailukatos",
+            "lintutorni": "Lintutorni",
+            "nahtavyys": "Nähtävyys",
+            "luola": "Luola",
+            "lahde": "Lähde"
+        }
+    },
+    "path": {
+        "routes": "Valmiit Reitit",
+        "add_route": "Lisää Reitti",
+        "name": "Reitin nimi",
+        "length": "Pituus",
+        "save_route": "Tallenna Reitti",
+        "back": "Takaisin"
     }
 }

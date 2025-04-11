@@ -2,9 +2,11 @@ import React from "react";
 import { View, StyleSheet, Text} from "react-native";
 import MapView, { Polyline } from "react-native-maps";
 import { Appbar } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 const PathDetailScreen = ({ route, navigation }) => {
     const { path } = route.params;
+    const { t } = useTranslation();
 
     return (
         <View style={{ flex: 1 }}>
@@ -27,8 +29,8 @@ const PathDetailScreen = ({ route, navigation }) => {
                 )}
             </MapView>
             <View style={styles.infoContainer}>
-                <Text style={styles.infoText}>Length: {formatDistance(path.length)}</Text>
-                <Text style={styles.infoText}>Created: {formatDate(path.createdAt?.seconds)}</Text>
+                <Text style={styles.infoText}>{t("path.detail.length")}: {formatDistance(path.length)}</Text>
+                <Text style={styles.infoText}>{t("path.detail.created")}: {formatDate(path.createdAt?.seconds)}</Text>
             </View>
         </View>
     );
