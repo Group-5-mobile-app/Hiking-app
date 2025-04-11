@@ -1,11 +1,12 @@
 from flask_cors import CORS
 from flask import Flask, request, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-ORS_API_KEY = "xx"
+ORS_API_KEY = os.environ.get("ORS_API_KEY")
 
 @app.route("/get_route", methods=["POST"])
 def get_route():
