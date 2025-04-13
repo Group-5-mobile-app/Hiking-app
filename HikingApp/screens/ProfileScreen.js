@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconButton } from "react-native-paper";
+import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconButton, useTheme } from "react-native-paper";
 import { auth, db } from "../firebase/firebaseConfig";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
-import theme from "../components/theme";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -22,6 +21,9 @@ const ProfileScreen = ({ navigation }) => {
     const [errorDialogVisible, setErrorDialogVisible] = useState(false);
 
     const { i18n, t } = useTranslation();
+
+    const theme = useTheme();
+    const styles = getStyles(theme);
 
     useEffect(() => {
         if (auth.currentUser) {
@@ -180,8 +182,7 @@ const ProfileScreen = ({ navigation }) => {
                             <View style={styles.profileHeader}>
                                 <Avatar.Text 
                                     size={70} 
-                                    label={username} 
-                                    backgroundColor={theme.colors.secondary}
+                                    label={username}
                                     style={styles.avatar}
                                 />
                                 <View style={styles.profileInfo}>
@@ -246,7 +247,6 @@ const ProfileScreen = ({ navigation }) => {
                                 <IconButton
                                     icon="plus"
                                     size={24}
-                                    iconColor={theme.colors.text}
                                     onPress={() => setAddFriendDialogVisible(true)}
                                 />
                             </View>
@@ -259,7 +259,6 @@ const ProfileScreen = ({ navigation }) => {
                                         <Avatar.Text 
                                             size={40} 
                                             label={friend.avatar} 
-                                            backgroundColor={theme.colors.secondary}
                                         />
                                         <View style={styles.friendInfo}>
                                             <Text style={styles.friendName}>{friend.name}</Text>
@@ -268,7 +267,6 @@ const ProfileScreen = ({ navigation }) => {
                                         <IconButton
                                             icon="close"
                                             size={20}
-                                            iconColor={theme.colors.text}
                                             onPress={() => {
                                                 setSelectedFriend(friend);
                                                 setRemoveFriendDialogVisible(true);
@@ -338,7 +336,7 @@ const AddFriendDialog = ({ visible, onDismiss, onAdd, email, onChangeEmail }) =>
                             value={email}
                             onChangeText={onChangeEmail}
                             mode="outlined"
-                            style={{ marginBottom: 10, backgroundColor: theme.colors.text}}
+                            style={{ marginBottom: 10}}
                             autoComplete="off"
                             keyboardType="email-address"
                             autoCapitalize="none"
@@ -374,166 +372,166 @@ const RemoveFriendDialog = ({ visible, onDismiss, onRemove, friend }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    scrollContainer: {
-        flexGrow: 1,
-    },
-    container: {
-        flex: 1,
-        alignItems: "center",
-        backgroundColor: theme.colors.background,
-        padding: 20,
-    },
-    profileCard: {
-        width: "100%",
-        marginBottom: 20,
-        backgroundColor: theme.colors.primary,
-        color: theme.colors.text
-    },
-    bioCard: {
-        width: "100%",
-        marginBottom: 20,
-        backgroundColor: theme.colors.primary,
-        color: theme.colors.text
-    },
-    routesCard: {
-        width: "100%",
-        marginBottom: 20,
-        backgroundColor: theme.colors.primary,
-        color: theme.colors.text
-    },
-    friendsCard: {
-        width: "100%",
-        backgroundColor: theme.colors.primary,
-        color: theme.colors.text
-    },
-    cardTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginBottom: 15,
-        color: theme.colors.text,
-    },
-    label: {
-        fontSize: 18,
-        marginBottom: 5,
-        color: theme.colors.text,
-    },
-    bioText: {
-        fontSize: 16,
-        lineHeight: 24,
-        color: theme.colors.text,
-    },
-    friendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 15,
-    },
-    friendInfo: {
-        marginLeft: 15,
-        flex: 1,
-    },
-    friendName: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: theme.colors.text,
-    },
-    friendStats: {
-        fontSize: 14,
-        color: theme.colors.text,
-    },
-    profileHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    avatar: {
-        marginRight: 20,
-    },
-    profileInfo: {
-        flexDirection: "column",
-        flex: 1,
-    },
-    divider: {
-        marginVertical: 15,
-        backgroundColor: theme.colors.text,
-        opacity: 0.2,
-    },
-    statsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        marginTop: 5,
-    },
-    statItem: {
-        alignItems: "center",
-    },
-    statValue: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: theme.colors.text,
-    },
-    statLabel: {
-        fontSize: 14,
-        color: theme.colors.text,
-        opacity: 0.8,
-    },
-    routeItem: {
-        marginBottom: 10,
-    },
-    routeHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    routeName: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: theme.colors.text,
-        flex: 1,
-    },
-    routeRating: {
-        fontSize: 16,
-        color: theme.colors.text,
-        fontWeight: "bold",
-    },
-    routeDetails: {
-        marginTop: 5,
-        marginBottom: 8,
-    },
-    routeInfo: {
-        fontSize: 14,
-        color: theme.colors.text,
-        opacity: 0.8,
-    },
-    routeDivider: {
-        backgroundColor: theme.colors.text,
-        opacity: 0.2,
-        marginTop: 2,
-    },
-    cardHeaderRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 10,
-    },
-    emptyListText: {
-        fontSize: 14,
-        color: theme.colors.text,
-        fontStyle: "italic",
-        textAlign: "center",
-        marginTop: 10,
-        marginBottom: 20,
-    },
-    languageCard: {
-        width: "100%",
-        marginBottom: 20,
-        marginTop: 20,
-        backgroundColor: theme.colors.primary,
-        color: theme.colors.text
-    },
-    languageButtons: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        gap: 10,
-    },
-});
+const getStyles = (theme) =>
+    StyleSheet.create({
+      scrollContainer: {
+          flexGrow: 1,
+          backgroundColor: theme.colors.background,
+      },
+      container: {
+          flex: 1,
+          alignItems: "center",
+          padding: 20,
+          backgroundColor: theme.colors.background,
+      },
+      profileCard: {
+          width: "100%",
+          marginBottom: 20,
+          backgroundColor: theme.colors.surface,
+      },
+      bioCard: {
+          width: "100%",
+          marginBottom: 20,
+          backgroundColor: theme.colors.surface,
+      },
+      routesCard: {
+          width: "100%",
+          marginBottom: 20,
+          backgroundColor: theme.colors.surface,
+      },
+      friendsCard: {
+          width: "100%",
+          backgroundColor: theme.colors.surface,
+      },
+      cardTitle: {
+          fontSize: 20,
+          fontWeight: "bold",
+          marginBottom: 15,
+          color: theme.colors.onSurface,
+      },
+      label: {
+          fontSize: 18,
+          marginBottom: 5,
+          color: theme.colors.onSurface,
+      },
+      bioText: {
+          fontSize: 16,
+          lineHeight: 24,
+          color: theme.colors.onSurfaceVariant ?? theme.colors.onSurface,
+      },
+      friendItem: {
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 15,
+      },
+      friendInfo: {
+          marginLeft: 15,
+          flex: 1,
+      },
+      friendName: {
+          fontSize: 16,
+          fontWeight: "bold",
+          color: theme.colors.onSurface,
+      },
+      friendStats: {
+          fontSize: 14,
+          color: theme.colors.onSurfaceVariant ?? theme.colors.onSurface,
+      },
+      profileHeader: {
+          flexDirection: "row",
+          alignItems: "center",
+      },
+      avatar: {
+          marginRight: 20,
+      },
+      profileInfo: {
+          flexDirection: "column",
+          flex: 1,
+      },
+      divider: {
+          marginVertical: 15,
+          backgroundColor: theme.colors.outline,
+          height: 1,
+          opacity: 0.2,
+      },
+      statsContainer: {
+          flexDirection: "row",
+          justifyContent: "space-around",
+          marginTop: 5,
+      },
+      statItem: {
+          alignItems: "center",
+      },
+      statValue: {
+          fontSize: 18,
+          fontWeight: "bold",
+          color: theme.colors.primary,
+      },
+      statLabel: {
+          fontSize: 14,
+          opacity: 0.8,
+          color: theme.colors.onSurfaceVariant ?? theme.colors.onSurface,
+      },
+      routeItem: {
+          marginBottom: 10,
+      },
+      routeHeader: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+      },
+      routeName: {
+          fontSize: 16,
+          fontWeight: "bold",
+          flex: 1,
+          color: theme.colors.onSurface,
+      },
+      routeRating: {
+          fontSize: 16,
+          fontWeight: "bold",
+          color: theme.colors.primary,
+      },
+      routeDetails: {
+          marginTop: 5,
+          marginBottom: 8,
+      },
+      routeInfo: {
+          fontSize: 14,
+          opacity: 0.8,
+          color: theme.colors.onSurfaceVariant ?? theme.colors.onSurface,
+      },
+      routeDivider: {
+          opacity: 0.2,
+          marginTop: 2,
+          backgroundColor: theme.colors.outline,
+          height: 1,
+      },
+      cardHeaderRow: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 10,
+      },
+      emptyListText: {
+          fontSize: 14,
+          fontStyle: "italic",
+          textAlign: "center",
+          marginTop: 10,
+          marginBottom: 20,
+          color: theme.colors.onSurfaceVariant ?? theme.colors.onSurface,
+      },
+      languageCard: {
+          width: "100%",
+          marginBottom: 20,
+          marginTop: 20,
+          backgroundColor: theme.colors.surface,
+      },
+      languageButtons: {
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          gap: 10,
+      },
+  });
+  
 
 export default ProfileScreen;

@@ -9,7 +9,7 @@ import { savePath, getUserPaths, getPublicRoutes } from "../firebase/firestore";
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 
-const SERVER_URL = "http://192.168.x.x:5000"; // here is your local IP address
+const SERVER_URL = "http://10.4.2.125:5000"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
   
 const AVAILABLE_TYPES = [

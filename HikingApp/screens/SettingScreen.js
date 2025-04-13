@@ -1,88 +1,102 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { Text, Card } from "react-native-paper";
-import theme from "../components/theme";
+import { Text, Card, useTheme } from "react-native-paper";
 
-const SettingScreen = () => {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
+  const theme = useTheme();
+  const styles = getStyles(theme);
 
-    return (
-        <View style={styles.container}>
-            <Card style={styles.card}>
-                <Card.Content>
-                    <Text style={styles.title}>Asetukset</Text>
-                    <Text style={styles.label}>Vaihda sovelluksen teema</Text>
-                    <TouchableOpacity
-                        style={[styles.button, isDarkMode ? styles.buttonActive : styles.buttonInactive]}
-                        onPress={() => setIsDarkMode(!isDarkMode)}>
-                        <Text style={[styles.buttonText, !isDarkMode ? { color: theme.colors.black } : {}]}>
-                            {isDarkMode ? "Tumma teema" : "Vaalea teema"}
-                        </Text>
-                    </TouchableOpacity>
-                    <Text style={styles.label}>Kieliasetukset</Text>
-                    <View style={styles.languageContainer}>
-                        <TouchableOpacity style={[styles.button, styles.languageButton]}>
-                            <Text style={styles.buttonText}>Suomi</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.button, styles.languageButton]}>
-                            <Text style={styles.buttonText}>Englanti</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Card.Content>
-            </Card>
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.title}>Asetukset</Text>
+          <Text style={styles.label}>Vaihda sovelluksen teema</Text>
+
+          <TouchableOpacity
+            style={isDarkMode ? styles.buttonDark : styles.buttonLight}
+            onPress={() => setIsDarkMode(!isDarkMode)}
+          >
+            <Text style={styles.buttonText}>
+              {isDarkMode ? "Tumma teema" : "Vaalea teema"}
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={styles.label}>Kieliasetukset</Text>
+
+          <View style={styles.languageContainer}>
+            <TouchableOpacity style={styles.languageButton}>
+              <Text style={styles.languageText}>Suomi</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.languageButton}>
+              <Text style={styles.languageText}>Englanti</Text>
+            </TouchableOpacity>
+          </View>
+        </Card.Content>
+      </Card>
+    </View>
+  );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) =>
+  StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: theme.colors.background,
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
     },
     card: {
-        width: "80%",
-        padding: 20,
-        transform: [{ translateY: -100 }],
-        backgroundColor: theme.colors.primary,
+      width: "80%",
+      padding: 20,
+      transform: [{ translateY: -100 }],
+      backgroundColor: theme.colors.primary,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 10,
-        color: theme.colors.text,
+      fontSize: 24,
+      fontWeight: "bold",
+      marginBottom: 10,
+      color: theme.colors.text,
     },
     label: {
-        fontSize: 18,
-        marginBottom: 5,
-        color: theme.colors.text,
+      fontSize: 18,
+      marginBottom: 5,
+      color: theme.colors.text,
     },
-    button: {
-        padding: 10,
-        marginVertical: 5,
-        borderRadius: 5,
-        alignItems: "center",
+    buttonLight: {
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 5,
+      alignItems: "center",
+      backgroundColor: theme.colors.surface,
     },
-    buttonActive: {
-        backgroundColor: theme.colors.secondary,
-    },
-    buttonInactive: {
-        backgroundColor: theme.colors.white,
+    buttonDark: {
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 5,
+      alignItems: "center",
+      backgroundColor: theme.colors.secondary,
     },
     buttonText: {
-        color: "white",
-        fontSize: 16,
+      fontSize: 16,
+      color: theme.colors.text,
     },
     languageContainer: {
-        backgroundColor: theme.colors.primary,
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 10,
+      padding: 10,
+      borderRadius: 5,
+      marginTop: 10,
     },
     languageButton: {
-        backgroundColor: theme.colors.secondary,
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 5,
+      alignItems: "center",
+      backgroundColor: theme.colors.secondary,
     },
-});
+    languageText: {
+      fontSize: 16,
+      color: theme.colors.white,
+    },
+  });
 
 export default SettingScreen;

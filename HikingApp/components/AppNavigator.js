@@ -12,7 +12,7 @@ import PathDetailScreen from "../screens/PathDetailScreen";
 
 const Stack = createStackNavigator();
 
-const AppNavigator = () => {
+const AppNavigator = ({ isDarkMode, setIsDarkMode }) => {
     return (
         <NavigationContainer>
             <Stack.Navigator>
@@ -21,7 +21,15 @@ const AppNavigator = () => {
                 <Stack.Screen name="Kirjaudu" component={LoginScreen} />
                 <Stack.Screen name="Luo" component={SignUpScreen} />
                 <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-                <Stack.Screen name="SettingScreen" component={SettingScreen} />
+                <Stack.Screen name="SettingScreen">
+                    {(props) => (
+                        <SettingScreen
+                            {...props}
+                            isDarkMode={isDarkMode}
+                            setIsDarkMode={setIsDarkMode}
+                        />
+                    )}
+                </Stack.Screen>
                 <Stack.Screen name="Paths" component={PathScreen} /> 
                 <Stack.Screen name="PathDetail" component={PathDetailScreen} /> 
             </Stack.Navigator>
