@@ -11,7 +11,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 
 const SERVER_URL = "https://hiking-app-flask.onrender.com"; // here is your local IP address
-const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
+const API_KEY = ""; //Otin API_KEYn pois kun pushasin gittiin t.eke
   
 const TYPE_KEYS = [ // englanti käännöksiä puuttuu näistä!! en ite osaa kääntää t. aleksi
   "map.types.nuotiopaikka", "map.types.laavu", "map.types.kota", "map.types.varaustupa", "map.types.autiotupa", "map.types.porokamppa",
