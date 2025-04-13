@@ -1,11 +1,12 @@
 from flask_cors import CORS
 from flask import Flask, request, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-ORS_API_KEY = "5b3ce3597851110001cf62483b76c10c645e4d018a5ae55d8fd9e72a"
+ORS_API_KEY = os.environ.get("ORS_API_KEY")
 
 @app.route("/get_route", methods=["POST"])
 def get_route():
@@ -28,5 +29,3 @@ def get_route():
     else:
         return jsonify({"error": "Route request failed", "details": response.text}), 500
     
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)

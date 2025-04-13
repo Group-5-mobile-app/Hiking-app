@@ -9,19 +9,21 @@ import ProfileScreen from "../screens/ProfileScreen";
 import SettingScreen from "../screens/SettingScreen";
 import PathScreen from "../screens/PathScreen";
 import PathDetailScreen from "../screens/PathDetailScreen";
+import { useTranslation } from 'react-i18next';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = ({ isDarkMode, setIsDarkMode }) => {
+    const { t } = useTranslation();
     return (
         <NavigationContainer>
             <Stack.Navigator>
-                <Stack.Screen name="Koti" component={HomeScreen} />
-                <Stack.Screen name="Kartta" component={MapScreen} />
-                <Stack.Screen name="Kirjaudu" component={LoginScreen} />
-                <Stack.Screen name="Luo" component={SignUpScreen} />
-                <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-                <Stack.Screen name="SettingScreen">
+                <Stack.Screen name="Koti" options={{ title: t("nav.home") }} component={HomeScreen} />
+                <Stack.Screen name="Kartta" options={{ title: t("nav.map") }} component={MapScreen} />
+                <Stack.Screen name="Kirjaudu" options={{ title: t("nav.login") }} component={LoginScreen} />
+                <Stack.Screen name="Luo" options={{ title: t("nav.signup") }} component={SignUpScreen} />
+                <Stack.Screen name="ProfileScreen" options={{ title: t("nav.profile") }} component={ProfileScreen} />
+                <Stack.Screen name="SettingScreen" options={{ title: t("nav.setting") }} >
                     {(props) => (
                         <SettingScreen
                             {...props}
@@ -30,8 +32,8 @@ const AppNavigator = ({ isDarkMode, setIsDarkMode }) => {
                         />
                     )}
                 </Stack.Screen>
-                <Stack.Screen name="Paths" component={PathScreen} /> 
-                <Stack.Screen name="PathDetail" component={PathDetailScreen} /> 
+                <Stack.Screen name="Paths" options={{ title: t("nav.paths") }} component={PathScreen} /> 
+                <Stack.Screen name="PathDetail" options={{ title: t("nav.pathDetail") }} component={PathDetailScreen} /> 
             </Stack.Navigator>
         </NavigationContainer>
     );
