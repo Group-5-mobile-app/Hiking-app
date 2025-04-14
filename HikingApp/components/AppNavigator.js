@@ -10,6 +10,7 @@ import SettingScreen from "../screens/SettingScreen";
 import PathScreen from "../screens/PathScreen";
 import PathDetailScreen from "../screens/PathDetailScreen";
 import { useTranslation } from 'react-i18next';
+import RouteTracker from "./RouteTracker";
 
 const Stack = createStackNavigator();
 
@@ -33,7 +34,8 @@ const AppNavigator = ({ isDarkMode, setIsDarkMode }) => {
                     )}
                 </Stack.Screen>
                 <Stack.Screen name="Paths" options={{ title: t("nav.paths") }} component={PathScreen} /> 
-                <Stack.Screen name="PathDetail" options={{ title: t("nav.pathDetail") }} component={PathDetailScreen} /> 
+                <Stack.Screen name="PathDetail" options={{ title: t("nav.pathDetail") }} component={PathDetailScreen} />
+                <Stack.Screen name="Tracker" options={{ title: t("nav.tracker") }} component={RouteTracker} /> 
             </Stack.Navigator>
         </NavigationContainer>
     );

@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import MapView, { Polyline } from "react-native-maps";
 import * as Location from 'expo-location'
+import { saveRoute } from "../firebase/firestore";
 
-const RouteTracker = () => {
+const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMode }) => {
+    const basePath = route?.params?.basePath || propBasePath || [];
+    const mode = route?.params?.mode || propMode || "new";
+
     const [coords, setcoords] = useState([]);
     const [finalCoords, setFinalCoords] = useState([]);
     const [tracking, setTracking] = useState(false);
     const [startTime, setStartTime] = useState(null);
     const [distance, setDistance] = useState(0);
     const watchRef = useRef(null);
+
+    useEffect(() => {
+        console.log("RouteTracker loaded with:", { basePath, mode });
+      }, []);
 
     const calculateDistance = (coord1, coord2) => {
         const toRad = (value) => (value * Math.PI) / 180;
@@ -29,7 +37,7 @@ const RouteTracker = () => {
     };
 
     const startTracking = async () => {
-        const { status } = await Location.requestBackgroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
             alert("Permission denied");
             return;
@@ -62,12 +70,49 @@ const RouteTracker = () => {
     const stopTracking = async () => {
         watchRef.current?.remove();
         setTracking(false);
-        await fetchEnhancedRoute(coords);
+
+        if (mode === "new" && coords.length > 1) {
+            await fetchEnhancedRoute(coords);
+        }
+
+        Alert.prompt(
+            "Route name",
+            "Give your route a name: ",
+            async (name) => {
+                if (!name) return;
+
+                const duration = getDuration();
+                const lengthInMeters = Math.round(distance);
+                const cleanedPath = finalCoords.length > 0 ? finalCoords : coords;
+
+                const routeData = {
+                    name,
+                    length: lengthInMeters,
+                    duration,
+                    path: cleanedPath
+                };
+
+                const success = await saveRoute(routeData);
+
+                if (success) {
+                    Alert.alert("Success", "Route saved");
+                    navigation?.navigate("Paths");
+                } else {
+                    Alert.alert("Error", "Failed to save");
+                }
+            }
+        );
     };
 
     const fetchEnhancedRoute = async (coords) => {
+
+        if (!coords || coords.length < 2) {
+            console.warn("Not enough coordinates to enhance route.");
+            return;
+        }
+        
         try {
-            const response = await fetch("http://192.168.1.160:5000", {
+            const response = await fetch("https://hiking-app-flask.onrender.com/get_route", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -101,37 +146,48 @@ const RouteTracker = () => {
         <View style={{ flex:1 }}>
             <MapView
             style={{ flex:1 }}
-            showsUserLocation
-            initialRegion={{
+            showsUserLocation={true}
+            region={{
                 latitude: coords[0]?.latitude || 60.1695,
                 longitude: coords[0]?.longitude || 24.9354,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
             }}
             >
-                { coords.length > 0 && (
-                    <Polyline 
+                {mode === "new" && coords.length > 0 && (
+                    <Polyline
                     coordinates={coords}
                     strokeColor="blue"
                     strokeWidth={3}
                     />
                 )}
-                {finalCoords.length > 0 && (
+                {(mode === "custom" || mode === "public") && basePath.length > 0 && (
+                    <Polyline
+                    coordinates={basePath}
+                    strokeColor={mode === "custom" ? "orange" : "purple"}
+                    strokeWidth={3}
+                    />
+                )}
+                {mode === "new" && finalCoords.length > 0 && (
                     <Polyline
                     coordinates={finalCoords}
                     strokeColor="green"
                     strokeWidth={4}
-                     />
+                    />
                 )}
             </MapView>
 
             <View style={styles.panel}>
                 <Text>Time: {getDuration()} s</Text>
                 <Text>Distance: {(distance / 1000).toFixed(2)} km</Text>
-                {!tracking ? (
-                    <Button mode="contained" onPress={startTracking}>Start Track</Button>
-                ) : (
-                    <Button mode="contained" onPress={stopTracking}>Stop & save</Button>
+                {(mode === "new" || mode === "custom" || mode === "public") && (
+                    <>
+                    {!tracking ? (
+                        <Button mode="contained" onPress={startTracking}>Start Track</Button>
+                    ) : (
+                        <Button mode="contained" onPress={stopTracking}>Stop & save</Button>
+                    )}
+                    </>
                 )}
             </View>
         </View>
