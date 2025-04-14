@@ -13,6 +13,8 @@ export const customLightTheme = {
     white: '#ffffff',
     black: '#000000',
     red: '#FF0000',
+    saveButton: '#b1d18a',
+    cancelButton: '#ff363b',
   },
 };
 
@@ -24,11 +26,13 @@ export const customDarkTheme = {
     secondary: '#616161',
     accent: '#03dac6',
     background: '#333333',
-    surface: '#444444',
+    surface: '#666666',
     text: '#ffffff',
     white: '#ffffff',
     black: '#000000',
     red: '#FF0000',
+    saveButton: '#b1d18a',
+    cancelButton: '#d60000',
     
   },
 };

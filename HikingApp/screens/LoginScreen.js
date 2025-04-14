@@ -51,7 +51,7 @@ const LoginScreen = ({ navigation }) => {
             mode="contained"
             style={styles.button}
             onPress={handleLogin}
-            labelStyle={styles.buttonLabel}
+            labelStyle={styles.whiteLabel}
           >
             Kirjaudu sisään
           </Button>
@@ -84,19 +84,23 @@ const getStyles = (theme) =>
     card: {
       padding: 20,
       borderRadius: 10,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.primary,
     },
     label: {
       marginBottom: 5,
       color: theme.colors.text,
     },
+    whiteLabel: {
+      marginBottom: 5,
+      color: theme.colors.white,
+    },
     input: {
       marginBottom: 10,
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.surface,
     },
     button: {
       marginTop: 20,
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.secondary,
     },
     buttonLabel: {
       color: theme.colors.text,

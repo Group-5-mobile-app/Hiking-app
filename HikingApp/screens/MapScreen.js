@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { View, StyleSheet, Alert, FlatList, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker, UrlTile, Polyline } from "react-native-maps";
-import { Button, TextInput, Checkbox } from "react-native-paper";
+import { Button, TextInput, Checkbox, useTheme } from "react-native-paper";
 import * as Location from 'expo-location'
 import { Ionicons } from "@expo/vector-icons";
 import { getAuth } from 'firebase/auth';
@@ -42,6 +42,9 @@ const MapScreen = () => {
   const [activeTab, setActiveTab] = useState("Filters");
   
   const debounceTimeout = useRef(null);
+
+  const theme = useTheme();
+  const styles = getStyles(theme);
 
   const { t } = useTranslation();
   const AVAILABLE_TYPES = TYPE_KEYS.map(key => t(key));
@@ -434,7 +437,7 @@ const MapScreen = () => {
             setWaypoints(prev => prev.slice(0, -1));
             setRoutePath([]);
           }}
-          style={{ marginTop: 10 }}
+          style={styles.cancelButton}
           >
             {t("map.undo")}
           </Button>
@@ -449,9 +452,11 @@ const MapScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) =>
+  StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   toggleButton: {
     position: "absolute",
@@ -548,6 +553,7 @@ const styles = StyleSheet.create({
     left: 10,
     right: 10,
     backgroundColor: "#fff",
+    backgroundColor: theme.colors.primary,
     padding: 15,
     borderRadius: 10,
     elevation: 6,
@@ -555,10 +561,15 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 10,
+    color: theme.colors.text,
   },
   saveButton: {
-    backgroundColor: "#007AFF",
     marginBottom: 5,
+    backgroundColor: theme.colors.saveButton,
+  },
+  cancelButton: {
+    marginTop: 10,
+    backgroundColor: theme.colors.cancelButton,
   },
   tabBar: {
     flexDirection: "row",

@@ -59,7 +59,10 @@ const SignUpScreen = ({ navigation }) => {
             style={styles.input}
           />
 
-          <Button mode="contained" style={styles.button} onPress={handleSignUp}>
+          <Button mode="contained" style={styles.button}
+           onPress={handleSignUp}
+          labelStyle={styles.whiteLabel}
+           >
             Luo tili
           </Button>
 
@@ -96,6 +99,10 @@ const getStyles = (theme) =>
     label: {
       marginBottom: 5,
       color: theme.colors.text,
+    },
+    whiteLabel: {
+      marginBottom: 5,
+      color: theme.colors.white,
     },
     spacing: {
       marginTop: 10,

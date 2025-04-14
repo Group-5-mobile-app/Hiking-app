@@ -66,7 +66,7 @@ const getStyles = (theme) =>
     },
     appbar: {
       width: "100%",
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.primary,
     },
     appbarTitle: {
       color: theme.colors.text,
