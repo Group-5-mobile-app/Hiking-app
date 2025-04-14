@@ -9,6 +9,7 @@ import { savePath, getUserPaths, getPublicRoutes } from "../firebase/firestore";
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
+import RouteTracker from "../components/RouteTracker";
 
 const SERVER_URL = "https://hiking-app-flask.onrender.com"; // here is your local IP address
 const API_KEY = "e6311845-2b5c-4e0f-babc-83539e8434e7";
@@ -40,6 +41,7 @@ const MapScreen = () => {
   const [selectedPathId, setSelectedPathId] = useState(null);
   const [selectedPathCoords, setSelectedPathCoords] = useState([]);
   const [activeTab, setActiveTab] = useState("Filters");
+  const [trackingMode, setTrackingMode] = useState(false);
   
   const debounceTimeout = useRef(null);
 
@@ -341,9 +343,22 @@ const MapScreen = () => {
                   <Picker.Item key={path.name} label={path.name} value={path.id} />
                 ))}
               </Picker>
+
+              {selectedPathId && !trackingMode && (
+                <Button mode="conatined" onPress={() => setTrackingMode(true)}>
+                  {t("map.start_tracking")}
+                </Button>
+              )}
             </View>
           )}
         </View>
+      )}
+      {trackingMode && selectedPathCoords.length > 0 && (
+        <RouteTracker
+          basePath={selectedPathCoords}
+          mode={"public"}
+          onTrackingEnd={() => setTrackingMode(flase)}
+        />
       )}
 
       <MapView

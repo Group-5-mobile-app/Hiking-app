@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text} from "react-native";
 import MapView, { Polyline } from "react-native-maps";
-import { Appbar } from "react-native-paper";
+import { Appbar, Button } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 
 const PathDetailScreen = ({ route, navigation }) => {
@@ -31,6 +31,10 @@ const PathDetailScreen = ({ route, navigation }) => {
             <View style={styles.infoContainer}>
                 <Text style={styles.infoText}>{t("path.detail.length")}: {formatDistance(path.length)}</Text>
                 <Text style={styles.infoText}>{t("path.detail.created")}: {formatDate(path.createdAt?.seconds)}</Text>
+
+                <Button mode="contained" style={styles.followButton} onPress={() => navigation.navigate("Tracker", {basePath: path.routePath, mode: "custom"})}>
+                    Start path
+                </Button>
             </View>
         </View>
     );
@@ -59,6 +63,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#333",
     },
+    followButton: {
+        marginTop: 15,
+        backgroundColor: "#689f38",
+      },
 });
 
 export default PathDetailScreen;

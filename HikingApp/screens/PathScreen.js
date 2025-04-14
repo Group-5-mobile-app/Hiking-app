@@ -85,6 +85,9 @@ const PathScreen = ({ navigation }) => {
                 <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta",)}>
                     {t("path.add_route")}
                 </Button>
+                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Tracker", {mode: "new"})}>
+                        Start Track
+                </Button>
                 </>
             ) : (
                 <>
