@@ -1,18 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Alert, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, Button, TextInput, Card, useTheme } from "react-native-paper";
-import { loginUser } from "../firebase/auth";
+import { loginUser, authStateListener } from "../firebase/auth";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   const theme = useTheme();
   const styles = getStyles(theme);
 
+  useEffect(() => {
+    const unsubscribe = authStateListener((user) => {
+      setLoggedInUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleLogin = async () => {
     try {
       const user = await loginUser(email, password);
+      setLoggedInUser(user);
       Alert.alert("Kirjautuminen onnistui", `Tervetuloa takaisin, ${user.email}!`);
       navigation.navigate("Koti");
     } catch (error) {
@@ -22,8 +32,10 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Kirjaudu sisään</Text>
 
+      {!loggedInUser && ( //Näkyy jos käyttäjä ei ole kirjautunut
+      <View>
+      <Text style={styles.title}>Kirjaudu sisään</Text>
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.label}>Sähköposti</Text>
@@ -61,6 +73,22 @@ const LoginScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Card.Content>
       </Card>
+      </View>
+      )}
+
+      {loggedInUser && ( // Näkyy jos käyttäjä on kirjautunut
+      <View>
+      <Text style={styles.title}>Kirjaudu ulos</Text>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.label}>
+              Tervetuloa, {loggedInUser.email}! Haluatko kirjautua ulos?
+            </Text>
+            <Text style={styles.label}>Voit kirjautua ulos heti kun saadaan nappi tähän :D</Text>
+          </Card.Content>
+        </Card>
+      </View>
+      )}
     </View>
   );
 };

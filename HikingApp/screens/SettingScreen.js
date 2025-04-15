@@ -1,10 +1,32 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { Text, Card, useTheme } from "react-native-paper";
+import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { Text, Card, Button, useTheme } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
+import deleteUser from "../components/deleteUser";
+import { auth } from "../firebase/firebaseConfig";
 
 const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
   const theme = useTheme();
   const styles = getStyles(theme);
+  const navigation = useNavigation();
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Vahvista poisto",
+      "Oletko varma, että haluat poistaa käyttäjätilisi? Tätä ei voi perua.",
+      [
+        { text: "Peruuta", style: "cancel" },
+        { text: "Poista", style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteUser();
+              Alert.alert("Käyttäjä poistettu");
+              navigation.navigate("Koti");
+            } catch (error) {
+              console.error("Virhe poistettaessa:", error);
+              Alert.alert("Virhe", error.message);
+            }
+          }}]);};
 
   return (
     <View style={styles.container}>
@@ -34,6 +56,20 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
           </View>
         </Card.Content>
       </Card>
+
+      <Card style={styles.card}>
+        <Card.Content>
+            <Text style={styles.title}>Poista käyttäjä</Text>
+            <Button 
+                mode="contained" 
+                style={styles.deleteButton}
+                labelStyle={{color: "white" }}
+                onPress={confirmDelete}
+                disabled={!auth.currentUser}>
+                Poista käyttäjä
+            </Button>
+        </Card.Content>
+    </Card>
     </View>
   );
 };
@@ -49,8 +85,8 @@ const getStyles = (theme) =>
     card: {
       width: "80%",
       padding: 20,
-      transform: [{ translateY: -100 }],
       backgroundColor: theme.colors.primary,
+      marginBottom: 30,
     },
     title: {
       fontSize: 24,
@@ -76,6 +112,13 @@ const getStyles = (theme) =>
       borderRadius: 5,
       alignItems: "center",
       backgroundColor: theme.colors.secondary,
+    },
+    deleteButton: {
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 5,
+      alignItems: "center",
+      backgroundColor: theme.colors.cancelButton,
     },
     buttonText: {
       fontSize: 16,

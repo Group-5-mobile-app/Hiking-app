@@ -1,12 +1,15 @@
 import React from "react";
 import { View, StyleSheet, Text} from "react-native";
 import MapView, { Polyline } from "react-native-maps";
-import { Appbar, Button } from "react-native-paper";
+import { Appbar, Button, useTheme } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 
 const PathDetailScreen = ({ route, navigation }) => {
     const { path } = route.params;
     const { t } = useTranslation();
+
+    const theme = useTheme();
+    const styles = getStyles(theme);
 
     return (
         <View style={{ flex: 1 }}>
@@ -32,7 +35,7 @@ const PathDetailScreen = ({ route, navigation }) => {
                 <Text style={styles.infoText}>{t("path.detail.length")}: {formatDistance(path.length)}</Text>
                 <Text style={styles.infoText}>{t("path.detail.created")}: {formatDate(path.createdAt?.seconds)}</Text>
 
-                <Button mode="contained" style={styles.followButton} onPress={() => navigation.navigate("Tracker", {basePath: path.routePath, mode: "custom"})}>
+                <Button mode="contained" style={styles.followButton} labelStyle={styles.whiteLabel} onPress={() => navigation.navigate("Tracker", {basePath: path.routePath, mode: "custom"})}>
                     Start path
                 </Button>
             </View>
@@ -51,9 +54,10 @@ const formatDistance = (length) => {
     return date.toLocaleDateString();
   };
 
-const styles = StyleSheet.create({
+  const getStyles = (theme) =>
+    StyleSheet.create({
     appbar: {
-        backgroundColor: "#689f38",
+        backgroundColor: theme.colors.primary,
     },
     infoContainer: {
         padding: 15,
@@ -65,8 +69,11 @@ const styles = StyleSheet.create({
     },
     followButton: {
         marginTop: 15,
-        backgroundColor: "#689f38",
+        backgroundColor: theme.colors.primary,
       },
+    whiteLabel: {
+        color: theme.colors.white,
+    },
 });
 
 export default PathDetailScreen;
