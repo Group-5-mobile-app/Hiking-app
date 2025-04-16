@@ -11,6 +11,9 @@ const ProfileScreen = ({ navigation }) => {
     const [username, setUsername] = useState("");
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [bioText, setBioText] = useState("");
+    const [isEditingBio, setIsEditingBio] = useState(false);
+    const [tempBioText, setTempBioText] = useState("");
     
     const [addFriendDialogVisible, setAddFriendDialogVisible] = useState(false);
     const [removeFriendDialogVisible, setRemoveFriendDialogVisible] = useState(false);
@@ -34,8 +37,49 @@ const ProfileScreen = ({ navigation }) => {
                 setUsername(name.charAt(0).toUpperCase());
             }
             fetchFriends();
+            fetchUserBio();
         }
     }, []);
+
+    const fetchUserBio = async () => {
+        try {
+            const userRef = doc(db, "user", auth.currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            
+            if (userDoc.exists() && userDoc.data().bio) {
+                setBioText(userDoc.data().bio);
+                setTempBioText(userDoc.data().bio);
+            } else {
+                setBioText(t("profile.about_me_placeholder"));
+                setTempBioText(t("profile.about_me_placeholder"));
+            }
+        } catch (error) {
+            console.error("Error fetching user bio:", error);
+            setBioText(t("profile.about_me_placeholder"));
+            setTempBioText(t("profile.about_me_placeholder"));
+        }
+    };
+
+    const handleSaveBio = async () => {
+        try {
+            const userRef = doc(db, "user", auth.currentUser.uid);
+            await updateDoc(userRef, {
+                bio: tempBioText
+            });
+            
+            setBioText(tempBioText);
+            setIsEditingBio(false);
+        } catch (error) {
+            console.error("Error saving bio:", error);
+            setErrorMessage(t("profile.bio.save_error"));
+            setErrorDialogVisible(true);
+        }
+    };
+
+    const handleCancelBioEdit = () => {
+        setTempBioText(bioText);
+        setIsEditingBio(false);
+    };
 
     const handleLanguageChange = async (lang) => {
         await AsyncStorage.setItem('language', lang);
@@ -212,10 +256,36 @@ const ProfileScreen = ({ navigation }) => {
                     {/* Bio Card */}
                     <Card style={styles.bioCard}>
                         <Card.Content>
-                            <Text style={styles.cardTitle}>{t("profile.about_me")}</Text>
-                            <Text style={styles.bioText}>
-                                {t("profile.about_me_placeholder")}
-                            </Text>
+                            <View style={styles.cardHeaderRow}>
+                                <Text style={styles.cardTitle}>{t("profile.about_me")}</Text>
+                                <IconButton
+                                    icon={isEditingBio ? "check" : "pencil"}
+                                    size={24}
+                                    onPress={isEditingBio ? handleSaveBio : () => setIsEditingBio(true)}
+                                />
+                                {isEditingBio && (
+                                    <IconButton
+                                        icon="close"
+                                        size={24}
+                                        onPress={handleCancelBioEdit}
+                                    />
+                                )}
+                            </View>
+                            
+                            {isEditingBio ? (
+                                <TextInput
+                                    value={tempBioText}
+                                    onChangeText={setTempBioText}
+                                    mode="outlined"
+                                    multiline
+                                    numberOfLines={4}
+                                    style={styles.bioTextInput}
+                                />
+                            ) : (
+                                <Text style={styles.bioText}>
+                                    {bioText}
+                                </Text>
+                            )}
                         </Card.Content>
                     </Card>
 
@@ -530,6 +600,10 @@ const getStyles = (theme) =>
           flexDirection: "row",
           justifyContent: "space-evenly",
           gap: 10,
+      },
+      bioTextInput: {
+          backgroundColor: theme.colors.background,
+          fontSize: 16,
       },
   });
   
