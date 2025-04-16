@@ -4,6 +4,7 @@ import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconBut
 import { auth, db } from "../firebase/firebaseConfig";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
+import { getUserRoutes } from "../firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = ({ navigation }) => {
@@ -11,6 +12,8 @@ const ProfileScreen = ({ navigation }) => {
     const [username, setUsername] = useState("");
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [routes, setRoutes] = useState([]);
+
     
     const [addFriendDialogVisible, setAddFriendDialogVisible] = useState(false);
     const [removeFriendDialogVisible, setRemoveFriendDialogVisible] = useState(false);
@@ -34,12 +37,22 @@ const ProfileScreen = ({ navigation }) => {
                 setUsername(name.charAt(0).toUpperCase());
             }
             fetchFriends();
+            fetchRoutes();
         }
     }, []);
 
     const handleLanguageChange = async (lang) => {
         await AsyncStorage.setItem('language', lang);
         i18n.changeLanguage(lang);
+    };
+
+    const fetchRoutes = async () => {
+        try {
+            const fetchedRoutes = await getUserRoutes();
+            setRoutes(fetchedRoutes);
+        } catch (error) {
+            console.error("Failed to load routes", error);
+        }
     };
 
     const fetchFriends = async () => {
@@ -158,14 +171,6 @@ const ProfileScreen = ({ navigation }) => {
         }
     };
 
-    // placeholder reitti dataa
-    const routes = [
-        { id: 1, name: "Nuuksion kansallispuisto", length: 12.5, rating: 4.8, date: "15.3.2025" },
-        { id: 2, name: "Pallas-Yllästunturi", length: 24.3, rating: 5.0, date: "23.2.2025" },
-        { id: 3, name: "Kolin kansallispuisto", length: 8.7, rating: 4.5, date: "3.2.2025" },
-        { id: 4, name: "Sipoonkorven reitti", length: 6.2, rating: 4.3, date: "1.12.2024" },
-    ];
-
     // placeholder tilasto dataa
     const userStats = {
         totalDistance: 178.5,
@@ -231,7 +236,7 @@ const ProfileScreen = ({ navigation }) => {
                                         <Text style={styles.routeRating}>★ {route.rating}</Text>
                                     </View>
                                     <View style={styles.routeDetails}>
-                                        <Text style={styles.routeInfo}>{route.length} km • {route.date}</Text>
+                                        <Text style={styles.routeInfo}>{route.length} m • {route.createdAt?.toDate().toLocaleDateString() ?? ""}</Text>
                                     </View>
                                     <Divider style={styles.routeDivider} />
                                 </View>
