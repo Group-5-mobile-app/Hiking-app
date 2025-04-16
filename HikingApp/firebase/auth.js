@@ -40,5 +40,7 @@ export const logoutUser = async () => {
 };
 
 export const authStateListener = (callback) => {
-    return onAuthStateChanged(auth, callback);
+    return onAuthStateChanged(auth, (firebaseUser) => {
+        callback(firebaseUser);
+    });
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FlatList, StyleSheet, View, TouchableOpacity } from "react-native";
-import { Appbar, Button, Card, Snackbar, TextInput, Text } from "react-native-paper";
+import { Appbar, Button, Card, Snackbar, TextInput, Text, useTheme } from "react-native-paper";
 import { savePath } from "../firebase/firestore";
 import { getUserPaths } from "../firebase/firestore";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,9 @@ const PathScreen = ({ navigation }) => {
     const [message, setMessage] = useState("");
     const [paths, setPaths] = useState([]);
     const { t } = useTranslation();
+
+    const theme = useTheme();
+    const styles = getStyles(theme);
 
     useEffect(() => {
         const loadPaths = async () => {
@@ -85,6 +88,9 @@ const PathScreen = ({ navigation }) => {
                 <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta",)}>
                     {t("path.add_route")}
                 </Button>
+                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Tracker", {mode: "new"})}>
+                        Start Track
+                </Button>
                 </>
             ) : (
                 <>
@@ -119,38 +125,39 @@ const PathScreen = ({ navigation }) => {
     );
 };
 
- const styles = StyleSheet.create({
+const getStyles = (theme) =>
+    StyleSheet.create({
     container: {
         alignItems: 'center',
         flex: 1,
-        backgroundColor: "#616161",
+        backgroundColor: theme.colors.background,
       },
       appbar: {
-        backgroundColor: "#689f38",
+        backgroundColor: theme.colors.primary,
       },
       title: {
         fontSize: 22,
         fontWeight: "bold",
         marginBottom: 20,
-        color: "#ffffff"
+        color: theme.colors.text,
       },
       card: {
-        backgroundColor: "#424242",
         padding: 15,
         marginBottom: 10,
         borderRadius: 10,
+        backgroundColor: theme.colors.primary,
       },
       pathName: {
         fontSize: 18,
-        color: "#fffff",
+        color: theme.colors.text,
       },
       pathDetails: {
         fontSize: 14,
-        color: "#b0bec5",
+        color: theme.colors.text,
       },
       button: {
         marginTop: 20,
-        backgroundColor: "#689f38",
+        backgroundColor: theme.colors.primary,
       },
  });
 

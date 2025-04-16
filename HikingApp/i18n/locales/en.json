@@ -7,7 +7,8 @@
         "profile": "Profile",
         "setting": "Settings",
         "paths": "Paths",
-        "pathDetail": "Path Details"
+        "pathDetail": "Path Details",
+        "tracker": "Tracker"
     },
     "distance": "Distance",
     "steps": "Steps",
@@ -50,6 +51,7 @@
         "radius": "Radius",
         "select_saved_route": "Select Saved Route",
         "enter_route_name": "Enter Route Name",
+        "start_tracking": "Start tracking",
         "save_path": "Save Path",
         "undo": "Undo",
         "types": {
@@ -78,7 +80,8 @@
         "back": "Back",
         "details": {
             "length": "Length",
-            "created": "Created"
+            "created": "Created",
+            "follow": "Follow"
         }
     }
 }

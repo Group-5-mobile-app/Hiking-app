@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Button, Text, TextInput, Card, useTheme } from "react-native-paper";
 import { registerUser } from "../firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 
 const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -14,8 +15,10 @@ const SignUpScreen = ({ navigation }) => {
   const handleSignUp = async () => {
     try {
       const newUser = await registerUser(email, password, confirmPassword);
-      Alert.alert("Tili luotu onnistuneesti!", `Tervetuloa ${newUser.email}`);
-      navigation.navigate("Kirjaudu");
+      const auth = getAuth();
+       // await signOut(auth); Saatan jatkaa huomenna, niin jätän kommentit muistutukseksi t.eke
+      Alert.alert("Tili luotu onnistuneesti!", `Tervetuloa ${newUser.email}!`); // \n Ole hyvä ja kirjaudu uudelle käyttäjällesi!
+      navigation.navigate("Koti"); // Tulevaisuudessa ehkä navigate "Kirjaudu", jos ylempi kommentti jätetään^?
     } catch (error) {
       Alert.alert("Error", error.message);
     }
@@ -59,7 +62,10 @@ const SignUpScreen = ({ navigation }) => {
             style={styles.input}
           />
 
-          <Button mode="contained" style={styles.button} onPress={handleSignUp}>
+          <Button mode="contained" style={styles.button}
+           onPress={handleSignUp}
+          labelStyle={styles.whiteLabel}
+           >
             Luo tili
           </Button>
 
@@ -96,6 +102,10 @@ const getStyles = (theme) =>
     label: {
       marginBottom: 5,
       color: theme.colors.text,
+    },
+    whiteLabel: {
+      marginBottom: 5,
+      color: theme.colors.white,
     },
     spacing: {
       marginTop: 10,
