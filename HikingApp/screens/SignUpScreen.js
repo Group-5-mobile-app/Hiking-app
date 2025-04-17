@@ -16,9 +16,9 @@ const SignUpScreen = ({ navigation }) => {
     try {
       const newUser = await registerUser(email, password, confirmPassword);
       const auth = getAuth();
-       // await signOut(auth); Saatan jatkaa huomenna, niin jätän kommentit muistutukseksi t.eke
-      Alert.alert("Tili luotu onnistuneesti!", `Tervetuloa ${newUser.email}!`); // \n Ole hyvä ja kirjaudu uudelle käyttäjällesi!
-      navigation.navigate("Koti"); // Tulevaisuudessa ehkä navigate "Kirjaudu", jos ylempi kommentti jätetään^?
+      await signOut(auth);
+      Alert.alert("Tili luotu onnistuneesti!", `Tervetuloa ${newUser.email}! \nOle hyvä ja kirjaudu uudelle käyttäjällesi!`);
+      navigation.navigate("Kirjaudu");
     } catch (error) {
       Alert.alert("Error", error.message);
     }

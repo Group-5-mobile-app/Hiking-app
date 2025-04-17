@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Alert, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, Button, TextInput, Card, useTheme } from "react-native-paper";
 import { loginUser, authStateListener } from "../firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -22,13 +23,31 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const user = await loginUser(email, password);
+      navigation.navigate("Koti");
       setLoggedInUser(user);
       Alert.alert("Kirjautuminen onnistui", `Tervetuloa takaisin, ${user.email}!`);
-      navigation.navigate("Koti");
     } catch (error) {
       Alert.alert("Error", error.message);
     }
   };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Oletko varma, että haluat kirjautua ulos?",
+      undefined,
+      [
+        { text: "Peruuta", style: "cancel" },
+        { text: "Kirjaudu Ulos", style: "destructive",
+          onPress: async () => {
+            try {
+              const auth = getAuth();
+              await signOut(auth);
+              setLoggedInUser(null);
+              navigation.navigate("Koti");
+              Alert.alert("Kirjauduit ulos!");
+            } catch (error) {
+              Alert.alert("Error", error.message);
+            }},},]);};
 
   return (
     <View style={styles.container}>
@@ -82,9 +101,16 @@ const LoginScreen = ({ navigation }) => {
         <Card style={styles.card}>
           <Card.Content>
             <Text style={styles.label}>
-              Tervetuloa, {loggedInUser.email}! Haluatko kirjautua ulos?
+              Moi, {loggedInUser.email}! Joko lähtemässä? :)
             </Text>
-            <Text style={styles.label}>Voit kirjautua ulos heti kun saadaan nappi tähän :D</Text>
+            <Button
+            mode="contained"
+            style={styles.button}
+            onPress={handleLogout}
+            labelStyle={styles.whiteLabel}
+          >
+            Kirjaudu ulos
+          </Button>
           </Card.Content>
         </Card>
       </View>
