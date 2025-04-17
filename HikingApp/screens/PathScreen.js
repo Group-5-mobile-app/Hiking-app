@@ -60,11 +60,6 @@ const PathScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Appbar.Header style={styles.appbar}>
-                <Appbar.BackAction onPress={() => navigation.goBack()} />
-                <Appbar.Content title="Polut" />
-            </Appbar.Header>
-
             {viewMode === "list" ? (
                 <>
                 <Text style={styles.title}>{t("path.routes")}</Text>
@@ -131,9 +126,6 @@ const getStyles = (theme) =>
         alignItems: 'center',
         flex: 1,
         backgroundColor: theme.colors.background,
-      },
-      appbar: {
-        backgroundColor: theme.colors.primary,
       },
       title: {
         fontSize: 22,
