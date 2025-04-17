@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
 import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconButton, useTheme } from "react-native-paper";
 import { auth, db } from "../firebase/firebaseConfig";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
@@ -229,17 +229,27 @@ const ProfileScreen = ({ navigation }) => {
                         <Card.Content>
                             <Text style={styles.cardTitle}>{t("profile.my_routes")}</Text>
                             
-                            {routes.map((route) => (
-                                <View key={route.id} style={styles.routeItem}>
-                                    <View style={styles.routeHeader}>
-                                        <Text style={styles.routeName}>{route.name}</Text>
-                                        <Text style={styles.routeRating}>★ {route.rating}</Text>
+                            {routes.map((route, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    onPress={() => navigation.navigate('RouteDetails', {
+                                        path: route.path,
+                                        name: route.name,
+                                        length: route.length,
+                                        duration: route.duration,
+                                    })}
+                                >
+                                    <View key={route.id} style={styles.routeItem}>
+                                        <View style={styles.routeHeader}>
+                                            <Text style={styles.routeName}>{route.name}</Text>
+                                            <Text style={styles.routeRating}>★ {route.rating}</Text>
+                                        </View>
+                                        <View style={styles.routeDetails}>
+                                            <Text style={styles.routeInfo}>{route.length} m • {route.createdAt?.toDate().toLocaleDateString() ?? ""}</Text>
+                                        </View>
+                                        <Divider style={styles.routeDivider} />
                                     </View>
-                                    <View style={styles.routeDetails}>
-                                        <Text style={styles.routeInfo}>{route.length} m • {route.createdAt?.toDate().toLocaleDateString() ?? ""}</Text>
-                                    </View>
-                                    <Divider style={styles.routeDivider} />
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </Card.Content>
                     </Card>

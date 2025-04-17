@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View, } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
-import MapView, { Polyline } from "react-native-maps";
+import MapView, { Polyline, UrlTile } from "react-native-maps";
 import * as Location from 'expo-location'
 import { saveRoute } from "../firebase/firestore";
 
@@ -18,6 +18,7 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
     const [routeName, setRouteName] = useState("");
     const watchRef = useRef(null);
     const coordsRef = useRef([]);
+    const mapRef = useRef(null);
 
     useEffect(() => {
         console.log("RouteTracker loaded with:", { basePath, mode });
@@ -53,7 +54,7 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
         setDistance(0);
 
         watchRef.current = await Location.watchPositionAsync(
-            { accuracy: Location.Accuracy.High, timeInterval: 1000, distanceInterval: 2 },
+            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
             (location) => {
                 const newCoord = {
                     latitude: location.coords.latitude,
@@ -70,6 +71,18 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
                         console.log("Added segment distance:", segmentDistance, "Total distance:", distance + segmentDistance);
                     } else {
                         console.log("First coordinate added");
+                    }
+
+                    if (mapRef.current) {
+                        mapRef.current.animateCamera({
+                            center: {
+                                latitude: newCoord.latitude,
+                                longitude: newCoord.longitude, 
+                            },
+                            zoom: 19, // zoom level for a "walkable" view
+                            heading: location.coords.heading ?? 0, // nice if user is moving
+                            pitch: 45,  // tilt the map slightly for a 3D effect
+                        }, { duration: 500 });  // smooth 0.5 sec transition
                     }
 
                     console.log("New coordinate:", newCoord);
@@ -146,15 +159,23 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
     return (
         <View style={{ flex:1 }}>
             <MapView
+            ref={mapRef}
             style={{ flex:1 }}
             showsUserLocation={true}
-            region={{
+            followsUserLocation={false}
+            initialRegion={{
                 latitude: coords[0]?.latitude || 60.1695,
                 longitude: coords[0]?.longitude || 24.9354,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
+                latitudeDelta: 0.001,
+                longitudeDelta: 0.001,
             }}
             >
+            <UrlTile 
+            urlTemplate="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+            maximumZ={19}
+            flipY={false}
+            />
+
                 {mode === "new" && coords.length > 0 && (
                     <Polyline
                     coordinates={coords}
@@ -165,10 +186,19 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
                 {(mode === "custom" || mode === "public") && basePath.length > 0 && (
                     <Polyline
                     coordinates={basePath}
-                    strokeColor={mode === "custom" ? "orange" : "purple"}
-                    strokeWidth={3}
+                    strokeColor="green"
+                    strokeWidth={4}
                     />
                 )}
+
+                {(mode === "custom" || mode === "public") && coords.length > 0 && (
+                    <Polyline
+                        coordinates={finalCoords}
+                        strokeColor="orange"
+                        strokeWidth={3}
+                    />
+                )}
+                
                 {mode === "new" && finalCoords.length > 0 && (
                     <Polyline
                     coordinates={finalCoords}
