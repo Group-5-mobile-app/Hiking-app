@@ -77,6 +77,8 @@
         "name": "Reitin nimi",
         "length": "Pituus",
         "save_route": "Tallenna Reitti",
-        "back": "Takaisin"
+        "back": "Takaisin",
+        "completed_walks": "Käydyt Reitit",
+        "to_profile": "Vie Profiiliin"
     }
 }

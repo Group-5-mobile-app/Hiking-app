@@ -78,6 +78,8 @@
         "length": "Length",
         "save_route": "Save Route",
         "back": "Back",
+        "completed_walks": "Completed Routes",
+        "to_profile": "Upload to profile",
         "details": {
             "length": "Length",
             "created": "Created",

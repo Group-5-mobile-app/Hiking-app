@@ -10,6 +10,7 @@ import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import RouteTracker from "../components/RouteTracker";
+import { useRoute } from "@react-navigation/native";
 
 const SERVER_URL = "https://hiking-app-flask.onrender.com"; // here is your local IP address
 const API_KEY = "";
@@ -25,7 +26,7 @@ const iconMap = {
   Laavu: require("../assets/icons/laavu.png"),
 };
 
-const MapScreen = () => {
+const MapScreen = ({ navigation }) => {
   const [restStops, setRestStops] = useState([]);
   const [position, setPosition] = useState(null);
   const [waypoints, setWaypoints] = useState([]);
@@ -50,6 +51,9 @@ const MapScreen = () => {
 
   const { t } = useTranslation();
   const AVAILABLE_TYPES = TYPE_KEYS.map(key => t(key));
+
+  const route = useRoute();
+  const addRouteMode = route.params?.addRouteMode || false;
   
   const toggleAddRoute = () => {
     setIsAdding(!isAdding);
@@ -57,6 +61,12 @@ const MapScreen = () => {
       setWaypoints([]);
     }
   };
+
+  useEffect(() => {
+    if (addRouteMode) {
+      toggleAddRoute();
+    }
+  }, [addRouteMode]);
 
   const handleMapPress = async (event) => {
     if (!isAdding) return;
@@ -348,7 +358,15 @@ const MapScreen = () => {
               </Picker>
 
               {selectedPathId && !trackingMode && (
-                <Button mode="conatined" onPress={() => setTrackingMode(true)}>
+                <Button mode="contained" onPress={() => {
+                  if (!selectedPathCoords.length) return;
+
+                  navigation.navigate("Tracker", {
+                    basePath: selectedPathCoords,
+                    mode: "public"
+                  });
+                }}
+                  >
                   {t("map.start_tracking")}
                 </Button>
               )}
@@ -360,7 +378,7 @@ const MapScreen = () => {
         <RouteTracker
           basePath={selectedPathCoords}
           mode={"public"}
-          onTrackingEnd={() => setTrackingMode(flase)}
+          onTrackingEnd={() => setTrackingMode(false)}
         />
       )}
 

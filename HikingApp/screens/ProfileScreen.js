@@ -4,7 +4,7 @@ import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconBut
 import { auth, db } from "../firebase/firebaseConfig";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
-import { getUserRoutes } from "../firebase/firestore";
+import { getUploadedRoutes } from "../firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = ({ navigation }) => {
@@ -37,7 +37,7 @@ const ProfileScreen = ({ navigation }) => {
                 setUsername(name.charAt(0).toUpperCase());
             }
             fetchFriends();
-            fetchRoutes();
+            fetchUploadedRoutes();
         }
     }, []);
 
@@ -46,9 +46,9 @@ const ProfileScreen = ({ navigation }) => {
         i18n.changeLanguage(lang);
     };
 
-    const fetchRoutes = async () => {
+    const fetchUploadedRoutes = async () => {
         try {
-            const fetchedRoutes = await getUserRoutes();
+            const fetchedRoutes = await getUploadedRoutes();
             setRoutes(fetchedRoutes);
         } catch (error) {
             console.error("Failed to load routes", error);
@@ -230,26 +230,16 @@ const ProfileScreen = ({ navigation }) => {
                             <Text style={styles.cardTitle}>{t("profile.my_routes")}</Text>
                             
                             {routes.map((route, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    onPress={() => navigation.navigate('RouteDetails', {
-                                        path: route.path,
-                                        name: route.name,
-                                        length: route.length,
-                                        duration: route.duration,
-                                    })}
-                                >
                                     <View key={route.id} style={styles.routeItem}>
                                         <View style={styles.routeHeader}>
                                             <Text style={styles.routeName}>{route.name}</Text>
                                             <Text style={styles.routeRating}>★ {route.rating}</Text>
                                         </View>
                                         <View style={styles.routeDetails}>
-                                            <Text style={styles.routeInfo}>{route.length} m • {route.createdAt?.toDate().toLocaleDateString() ?? ""}</Text>
+                                            <Text style={styles.routeInfo}>{route.length} m • {route.uploadedAt?.toDate().toLocaleDateString() ?? ""}</Text>
                                         </View>
                                         <Divider style={styles.routeDivider} />
                                     </View>
-                                </TouchableOpacity>
                             ))}
                         </Card.Content>
                     </Card>
