@@ -5,7 +5,7 @@ import MapView, { Polyline, UrlTile } from "react-native-maps";
 import * as Location from 'expo-location'
 import { saveRoute } from "../firebase/firestore";
 
-const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMode }) => {
+const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMode, onTrackingEnd }) => {
     const basePath = route?.params?.basePath || propBasePath || [];
     const mode = route?.params?.mode || propMode || "new";
 
@@ -22,7 +22,7 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
 
     useEffect(() => {
         console.log("RouteTracker loaded with:", { basePath, mode });
-      }, []);
+    }, []);
 
     const calculateDistance = (coord1, coord2) => {
         const toRad = (value) => (value * Math.PI) / 180;
@@ -54,7 +54,7 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
         setDistance(0);
 
         watchRef.current = await Location.watchPositionAsync(
-            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
+            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 3 },
             (location) => {
                 const newCoord = {
                     latitude: location.coords.latitude,
@@ -202,7 +202,7 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
                 {mode === "new" && finalCoords.length > 0 && (
                     <Polyline
                     coordinates={finalCoords}
-                    strokeColor="green"
+                    strokeColor={mode === "custom" ? "green" : "green"}
                     strokeWidth={4}
                     />
                 )}
@@ -238,7 +238,12 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
 
                             if (success) {
                                 Alert.alert("Success", "Route saved");
-                                navigation?.navigate("Paths");
+                                if (navigation) {
+                                    navigation.navigate("Paths");
+                                }
+                                if (onTrackingEnd) {
+                                    onTrackingEnd();
+                                }
                             } else {
                                 Alert.alert("Error")
                             }

@@ -115,3 +115,41 @@ export const getPublicRoutes = async () => {
         throw error;
     }
 }
+
+export const uploadedRoutes = async (route, rating) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+
+    try {
+        const uploadRef = collection(db, `user/${user.uid}/uploadedRoutes`);
+        await addDoc(uploadRef, {
+            name: route.name,
+            length: route.length,
+            rating,
+            uploadedAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error("Error uploading shared route", error);
+        throw error;
+    }
+};
+
+export const getUploadedRoutes = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+
+    try {
+        const uploadedRef = collection(db, `user/${user.uid}/uploadedRoutes`);
+        const querySnapshot = await getDocs(uploadedRef);
+
+        return querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+    } catch (error) {
+        console.error("Error fetching uploaded routes: ", error);
+        throw error;
+    }
+};

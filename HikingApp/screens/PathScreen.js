@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FlatList, StyleSheet, View, TouchableOpacity } from "react-native";
 import { Appbar, Button, Card, Snackbar, TextInput, Text, useTheme } from "react-native-paper";
-import { savePath } from "../firebase/firestore";
-import { getUserPaths } from "../firebase/firestore";
+import StarRating from 'react-native-star-rating-widget';
+import { getUserRoutes, savePath, getUserPaths, uploadedRoutes } from "../firebase/firestore";
 import { useTranslation } from "react-i18next";
 
 
@@ -12,6 +12,7 @@ const PathScreen = ({ navigation }) => {
     const [length, setLength] = useState("");
     const [message, setMessage] = useState("");
     const [paths, setPaths] = useState([]);
+    const [completedWalks, setCompletedWalks] = useState([]);
     const { t } = useTranslation();
 
     const theme = useTheme();
@@ -27,7 +28,17 @@ const PathScreen = ({ navigation }) => {
             }
         };
         loadPaths();
+        fetchCompleted();
     }, []);
+    
+    const fetchCompleted = async () => {
+        try {
+            const fetchedCompleted = await getUserRoutes();
+            setCompletedWalks(fetchedCompleted);
+        } catch (error) {
+            console.error("Error", error);
+        }
+    }
 
     const handleSavePath = async () => {
         if (!name || !length) {
@@ -58,9 +69,43 @@ const PathScreen = ({ navigation }) => {
         return date.toLocaleDateString();
     }
 
+    const handleRatingChange = (walkId, newRating) => {
+        setCompletedWalks((prev) => 
+            prev.map((walk) => 
+                walk.id === walkId ? { ...walk, rating: newRating } : walk
+            )
+        );
+    };
+
+    const uploadWalkToProfile = async (walk) => {
+        try {
+            await uploadedRoutes(walk, walk.rating || 0, walk.completedAt?.seconds);
+            setMessage("Walk uploaded successfully!");
+        } catch (error) {
+            console.error("Failed to upload walk", error);
+            setMessage("Failed to upload walk.");
+        }
+    };
+
     return (
         <View style={styles.container}>
-            {viewMode === "list" ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
+                <Button
+                    mode="contained"
+                    style={styles.button}
+                    onPress={() => setViewMode("completed")}
+                >
+                    {t("path.completed_walks")}
+                </Button>
+                <Button
+                    mode="contained"
+                    style={styles.button}
+                    onPress={() => navigation.navigate("Kartta")}
+                >
+                    {t("path.add_route")}
+                </Button>
+            </View>
+            {viewMode === "list" && (
                 <>
                 <Text style={styles.title}>{t("path.routes")}</Text>
                 <FlatList
@@ -72,50 +117,50 @@ const PathScreen = ({ navigation }) => {
                             <Card.Content>
                             <Text style={styles.pathName}>{item.name}</Text>
                             <Text style={styles.pathDetails}>
-                                {formatDistance(item.length)} - {formatDate(item.createdAt?.seconds)}
+                                {formatDistance(item.length)} - {formatDate(item.completedAt)}
                             </Text>
                             </Card.Content>
                         </Card>
                         </TouchableOpacity>
                     )}
                 />
-
-                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Kartta",)}>
-                    {t("path.add_route")}
-                </Button>
-                <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Tracker", {mode: "new"})}>
+                    <Button mode="contained" style={styles.button} onPress={() => navigation.navigate("Tracker", {mode: "new"})}>
                         Start Track
-                </Button>
-                </>
-            ) : (
-                <>
-                    <Text style={styles.title}>{t("path.add_route")}</Text>
-                    <TextInput 
-                        mode="outlined"
-                        label={t("path.name")}
-                        value={name}
-                        onChangeText={setName}
-                    />
-                    <TextInput
-                        mode="outlined"
-                        label={t("path.length")}
-                        keyboardType="numeric"
-                        value={length}
-                        onChangeText={setLength}
-                    />
-
-                    <Button mode="contained" style={styles.button} onPress={handleSavePath}>
-                        {t("path.save_route")}
                     </Button>
-                    <Button mode="outlined" style={styles.button} onPress={() => setViewMode("list")}>
-                        {t("path.back")}
-                    </Button>
-                    <Snackbar visible={!!message} onDismiss={() => setMessage("")}>
-                        {message}
-                    </Snackbar>
                 </>
             )}
-            
+            {viewMode === "completed" && (
+                <>
+                    <Text style={styles.title}>Completed Walks</Text>
+                    <FlatList
+                        data={completedWalks}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({item}) => (
+                            <Card style={styles.card}>
+                                <Card.Content>
+                                    <Text style={styles.pathName}>{item.name}</Text>
+                                    <Text style={styles.pathDetails}>
+                                        {formatDistance(item.length)} - {formatDate(item.completedAt?.seconds)}
+                                    </Text>
+
+                                    <StarRating
+                                    rating={item.rating || 0}
+                                    onChange={(newRating) => handleRatingChange(item.id, newRating)}
+                                    />
+
+                                    <Button mode="contained" onPress={() => uploadWalkToProfile(item)}>
+                                        {t("path.to_profile")}
+                                    </Button>
+                                </Card.Content>
+                            </Card>
+                        )}
+                    />
+                    <Button mode="contained" style={styles.button} onPress={() => setViewMode("list")}>
+                        Back
+                    </Button>
+                </>
+            )}
+
         </View>
     );
 };
@@ -149,6 +194,7 @@ const getStyles = (theme) =>
       },
       button: {
         marginTop: 20,
+        marginBottom: 10,
         backgroundColor: theme.colors.primary,
       },
  });
