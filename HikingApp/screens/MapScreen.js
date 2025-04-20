@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, Alert, FlatList, Text, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Alert, FlatList, Text, TouchableOpacity, ScrollView } from "react-native";
 import MapView, { Marker, UrlTile, Polyline } from "react-native-maps";
 import { Button, TextInput, Checkbox, useTheme } from "react-native-paper";
 import * as Location from 'expo-location'
@@ -10,11 +10,12 @@ import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import RouteTracker from "../components/RouteTracker";
+import { useRoute } from "@react-navigation/native";
 
 const SERVER_URL = "https://hiking-app-flask.onrender.com"; // here is your local IP address
 const API_KEY = "";
   
-const TYPE_KEYS = [ // englanti käännöksiä puuttuu näistä!! en ite osaa kääntää t. aleksi
+const TYPE_KEYS = [
   "map.types.nuotiopaikka", "map.types.laavu", "map.types.kota", "map.types.varaustupa", "map.types.autiotupa", "map.types.porokamppa",
   "map.types.paivatupa", "map.types.kammi", "map.types.sauna", "map.types.ruokailukatos", "map.types.lintutorni",
   "map.types.nahtavyys", "map.types.luola", "map.types.lahde" 
@@ -25,7 +26,7 @@ const iconMap = {
   Laavu: require("../assets/icons/laavu.png"),
 };
 
-const MapScreen = () => {
+const MapScreen = ({ navigation }) => {
   const [restStops, setRestStops] = useState([]);
   const [position, setPosition] = useState(null);
   const [waypoints, setWaypoints] = useState([]);
@@ -42,6 +43,8 @@ const MapScreen = () => {
   const [selectedPathCoords, setSelectedPathCoords] = useState([]);
   const [activeTab, setActiveTab] = useState("Filters");
   const [trackingMode, setTrackingMode] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [searchPin, setSearchPin] = useState(null);
   
   const debounceTimeout = useRef(null);
 
@@ -50,6 +53,9 @@ const MapScreen = () => {
 
   const { t } = useTranslation();
   const AVAILABLE_TYPES = TYPE_KEYS.map(key => t(key));
+
+  const route = useRoute();
+  const addRouteMode = route.params?.addRouteMode || false;
   
   const toggleAddRoute = () => {
     setIsAdding(!isAdding);
@@ -58,30 +64,44 @@ const MapScreen = () => {
     }
   };
 
+  useEffect(() => {
+    if (addRouteMode) {
+      toggleAddRoute();
+    }
+  }, [addRouteMode]);
+
   const handleMapPress = async (event) => {
-    if (!isAdding) return;
-
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    const updatedWaypoints = [...waypoints, { latitude, longitude }];
-    setWaypoints(updatedWaypoints);
 
-    if (updatedWaypoints.length >= 2) {
-      try {
-        const response = await fetch(`${SERVER_URL}/get_route`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ waypoints: updatedWaypoints }),
-        });
-        const data = await response.json();
-        if (data.features) {
-          const coords = data.features[0].geometry.coordinates.map(coord => ({
-            latitude: coord[1], longitude: coord[0]
-          }));
-          setRoutePath(coords);
+    if (isAdding) {
+      const updatedWaypoints = [...waypoints, { latitude, longitude }];
+      setWaypoints(updatedWaypoints);
+
+      if (updatedWaypoints.length >= 2) {
+        try {
+          const response = await fetch(`${SERVER_URL}/get_route`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ waypoints: updatedWaypoints }),
+          });
+          const data = await response.json();
+          if (data.features) {
+            const coords = data.features[0].geometry.coordinates.map(coord => ({
+              latitude: coord[1], longitude: coord[0]
+            }));
+            setRoutePath(coords);
+          }
+        } catch (error) {
+          console.error("Error fetching route:", error);
         }
-      } catch (error) {
-        console.error("Error fetching route:", error);
       }
+    } else {
+      setSearchPin({
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
     }
   };
 
@@ -120,10 +140,11 @@ const MapScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (position && restStops.length && debouncedRadius) {
-      filterStops(restStops, selectedTypes, position, debouncedRadius);
+    const locationToUse = searchPin || userLocation;
+    if (locationToUse && restStops.length && debouncedRadius) {
+      filterStops(restStops, selectedTypes, locationToUse, debouncedRadius);
     }
-  }, [restStops, selectedTypes, position, debouncedRadius]);
+  }, [restStops, selectedTypes, userLocation, debouncedRadius, searchPin]);
 
   useEffect(() => {
     const fetchPaths = async () => {
@@ -174,12 +195,14 @@ const MapScreen = () => {
     }
 
     const location = await Location.getCurrentPositionAsync({});
-    setPosition({
+    const coords = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
-    });
+    };
+    setPosition(coords); // used for centering the map
+    setUserLocation(coords); // fixed reference for filtering
   };
 
   const filterStops = (stops, types, position, radius) => {
@@ -288,7 +311,7 @@ const MapScreen = () => {
 
           {/* Tab Content */}
           {activeTab === "filters" ? (
-            <>
+            <ScrollView style={{ maxHeight: 400 }} contentContainerStyle={{ paddingBottom: 16 }}>
               <View style={styles.checkboxGrid}>
                 {AVAILABLE_TYPES.map((item) => (
                   <TouchableOpacity
@@ -308,6 +331,7 @@ const MapScreen = () => {
                 ))}
               </View>
 
+              {/* Radius Slider */}
               <View style={styles.sliderContainer}>
                 <Text style={styles.sliderLabel}>{t("map.radius")}: {radius} km</Text>
                 <Slider
@@ -318,7 +342,18 @@ const MapScreen = () => {
                   style={styles.slider}
                 />
               </View>
-            </>
+
+              {/* Clear Search Pin Button */}
+              {searchPin && (
+                <Button
+                  mode="outlined"
+                  onPress={() => setSearchPin(null)}
+                  style={{marginTop: 10 }}
+                >
+                  {"Clear Search Pin"}
+                </Button>
+              )}
+            </ScrollView>
           ) : (
             <View style={{ paddingHorizontal: 10 }}>
               <Text style={styles.sliderLabel}>{t("map.select_saved_route")}:</Text>
@@ -348,7 +383,15 @@ const MapScreen = () => {
               </Picker>
 
               {selectedPathId && !trackingMode && (
-                <Button mode="conatined" onPress={() => setTrackingMode(true)}>
+                <Button mode="contained" onPress={() => {
+                  if (!selectedPathCoords.length) return;
+
+                  navigation.navigate("Tracker", {
+                    basePath: selectedPathCoords,
+                    mode: "public"
+                  });
+                }}
+                  >
                   {t("map.start_tracking")}
                 </Button>
               )}
@@ -360,7 +403,7 @@ const MapScreen = () => {
         <RouteTracker
           basePath={selectedPathCoords}
           mode={"public"}
-          onTrackingEnd={() => setTrackingMode(flase)}
+          onTrackingEnd={() => setTrackingMode(false)}
         />
       )}
 
@@ -375,6 +418,15 @@ const MapScreen = () => {
         showsUserLocation={true}
         showsMyLocationButton={true}
         onPress={handleMapPress} // Allow pressing only when adding mode is active
+        onUserLocationChange={(e) => {
+          const { latitude, longitude } = e.nativeEvent.coordinate;
+          setUserLocation({
+            latitude,
+            longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          });
+        }}
       >
 
         <UrlTile 
@@ -422,6 +474,15 @@ const MapScreen = () => {
           strokeWidth={4}
           strokeColor="green"
           />
+      )}
+
+      {searchPin && (
+        <Marker
+          coordinate={searchPin}
+          pinColor="blue"
+          title="Search Location"
+          description="Filtering rest stops near this point"
+        />
       )}
       </MapView>
 

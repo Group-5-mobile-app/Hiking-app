@@ -16,7 +16,7 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
       "Oletko varma, että haluat poistaa käyttäjätilisi? Tätä ei voi perua.",
       [
         { text: "Peruuta", style: "cancel" },
-        { text: "Poista", style: "destructive",
+        { text: "Kyllä, poista käyttäjä", style: "destructive",
           onPress: async () => {
             try {
               await deleteUser();

@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Text} from "react-native";
-import MapView, { Polyline } from "react-native-maps";
+import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { Appbar, Button, useTheme } from "react-native-paper";
-import { useTranslation } from "react-i18next";
+import { useSSR, useTranslation } from "react-i18next";
+import { getUploadedRoutes } from "../firebase/firestore";
+import StarRating from "react-native-star-rating-widget";
 
 const PathDetailScreen = ({ route, navigation }) => {
     const { path } = route.params;
@@ -13,20 +15,20 @@ const PathDetailScreen = ({ route, navigation }) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <Appbar.Header style={styles.appbar}>
-                <Appbar.BackAction onPress={() => navigation.goBack()} />
-                <Appbar.Content title={path.name} />
-            </Appbar.Header>
-
             <MapView
             style={{ flex: 1 }}
-            initialRegion={{
+            region={{
                 latitude: path.routePath[0].latitude,
                 longitude: path.routePath[0].longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
             }}
             >
+                <UrlTile
+                urlTemplate="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                maximumZ={19}
+                flipY={false}
+                />
                 {path.routePath && path.routePath.length > 0 && (
                     <Polyline coordinates={path.routePath} strokeColor="green" strokeWidth={4} />
                 )}
@@ -34,7 +36,6 @@ const PathDetailScreen = ({ route, navigation }) => {
             <View style={styles.infoContainer}>
                 <Text style={styles.infoText}>{t("path.detail.length")}: {formatDistance(path.length)}</Text>
                 <Text style={styles.infoText}>{t("path.detail.created")}: {formatDate(path.createdAt?.seconds)}</Text>
-
                 <Button mode="contained" style={styles.followButton} labelStyle={styles.whiteLabel} onPress={() => navigation.navigate("Tracker", {basePath: path.routePath, mode: "custom"})}>
                     Start path
                 </Button>
@@ -56,9 +57,6 @@ const formatDistance = (length) => {
 
   const getStyles = (theme) =>
     StyleSheet.create({
-    appbar: {
-        backgroundColor: theme.colors.primary,
-    },
     infoContainer: {
         padding: 15,
         backgroundColor: "#e0f2f1",

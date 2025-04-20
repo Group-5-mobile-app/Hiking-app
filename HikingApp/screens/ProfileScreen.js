@@ -6,6 +6,7 @@ import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRem
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useTranslation } from "react-i18next";
+import { getUploadedRoutes } from "../firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = ({ navigation }) => {
@@ -19,6 +20,8 @@ const ProfileScreen = ({ navigation }) => {
     const [avatarBase64, setAvatarBase64] = useState(null);
     const [isEditingAvatar, setIsEditingAvatar] = useState(false);
     const [loadingAvatar, setLoadingAvatar] = useState(false);
+    const [routes, setRoutes] = useState([]);
+
     
     const [addFriendDialogVisible, setAddFriendDialogVisible] = useState(false);
     const [removeFriendDialogVisible, setRemoveFriendDialogVisible] = useState(false);
@@ -161,6 +164,15 @@ const ProfileScreen = ({ navigation }) => {
         i18n.changeLanguage(lang);
     };
 
+    const fetchUploadedRoutes = async () => {
+        try {
+            const fetchedRoutes = await getUploadedRoutes();
+            setRoutes(fetchedRoutes);
+        } catch (error) {
+            console.error("Failed to load routes", error);
+        }
+    };
+
     const fetchFriends = async () => {
         setLoading(true);
         try {
@@ -273,13 +285,7 @@ const ProfileScreen = ({ navigation }) => {
         }
     };
 
-    const routes = [
-        { id: 1, name: "Nuuksion kansallispuisto", length: 12.5, rating: 4.8, date: "15.3.2025" },
-        { id: 2, name: "Pallas-Yllästunturi", length: 24.3, rating: 5.0, date: "23.2.2025" },
-        { id: 3, name: "Kolin kansallispuisto", length: 8.7, rating: 4.5, date: "3.2.2025" },
-        { id: 4, name: "Sipoonkorven reitti", length: 6.2, rating: 4.3, date: "1.12.2024" },
-    ];
-
+    // placeholder tilasto dataa
     const userStats = {
         totalDistance: 178.5,
         totalSteps: 236400,
@@ -401,17 +407,17 @@ const ProfileScreen = ({ navigation }) => {
                         <Card.Content>
                             <Text style={styles.cardTitle}>{t("profile.my_routes")}</Text>
                             
-                            {routes.map((route) => (
-                                <View key={route.id} style={styles.routeItem}>
-                                    <View style={styles.routeHeader}>
-                                        <Text style={styles.routeName}>{route.name}</Text>
-                                        <Text style={styles.routeRating}>★ {route.rating}</Text>
+                            {routes.map((route, index) => (
+                                    <View key={route.id} style={styles.routeItem}>
+                                        <View style={styles.routeHeader}>
+                                            <Text style={styles.routeName}>{route.name}</Text>
+                                            <Text style={styles.routeRating}>★ {route.rating}</Text>
+                                        </View>
+                                        <View style={styles.routeDetails}>
+                                            <Text style={styles.routeInfo}>{route.length} m • {route.uploadedAt?.toDate().toLocaleDateString() ?? ""}</Text>
+                                        </View>
+                                        <Divider style={styles.routeDivider} />
                                     </View>
-                                    <View style={styles.routeDetails}>
-                                        <Text style={styles.routeInfo}>{route.length} km • {route.date}</Text>
-                                    </View>
-                                    <Divider style={styles.routeDivider} />
-                                </View>
                             ))}
                         </Card.Content>
                     </Card>
