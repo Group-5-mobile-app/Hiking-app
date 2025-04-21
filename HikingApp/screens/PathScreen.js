@@ -117,7 +117,7 @@ const PathScreen = ({ navigation }) => {
                             <Card.Content>
                             <Text style={styles.pathName}>{item.name}</Text>
                             <Text style={styles.pathDetails}>
-                                {formatDistance(item.length)} - {formatDate(item.completedAt)}
+                                {formatDistance(item.length)} - {formatDate(item.createdAt)}
                             </Text>
                             </Card.Content>
                         </Card>
@@ -138,11 +138,20 @@ const PathScreen = ({ navigation }) => {
                         renderItem={({item}) => (
                             <Card style={styles.card}>
                                 <Card.Content>
-                                    <Text style={styles.pathName}>{item.name}</Text>
-                                    <Text style={styles.pathDetails}>
-                                        {formatDistance(item.length)} - {formatDate(item.completedAt?.seconds)}
-                                    </Text>
-
+                                    <TouchableOpacity onPress={() => navigation.navigate('RouteDetails', {
+                                        path: item.path,
+                                        name: item.name,
+                                        length: item.length,
+                                        duration: item.duration,
+                                        steps: item.steps,
+                                        createdAt: item.createdAt,
+                                    })} >
+                                        <Text style={styles.pathName}>{item.name}</Text>
+                                        <Text style={styles.pathDetails}>Steps: {item.steps}</Text>
+                                        <Text style={styles.pathDetails}>
+                                            {formatDistance(item.length)} - {formatDate(item.createdAt?.seconds)}
+                                        </Text>
+                                    </TouchableOpacity>
                                     <StarRating
                                     rating={item.rating || 0}
                                     onChange={(newRating) => handleRatingChange(item.id, newRating)}

@@ -3,8 +3,6 @@ import { View, StyleSheet, Text} from "react-native";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { Appbar, Button, useTheme } from "react-native-paper";
 import { useSSR, useTranslation } from "react-i18next";
-import { getUploadedRoutes } from "../firebase/firestore";
-import StarRating from "react-native-star-rating-widget";
 
 const PathDetailScreen = ({ route, navigation }) => {
     const { path } = route.params;
@@ -36,6 +34,7 @@ const PathDetailScreen = ({ route, navigation }) => {
             <View style={styles.infoContainer}>
                 <Text style={styles.infoText}>{t("path.detail.length")}: {formatDistance(path.length)}</Text>
                 <Text style={styles.infoText}>{t("path.detail.created")}: {formatDate(path.createdAt?.seconds)}</Text>
+                <Text style={styles.infoText}>{t("path.detail.steps")}: {path.steps}</Text>
                 <Button mode="contained" style={styles.followButton} labelStyle={styles.whiteLabel} onPress={() => navigation.navigate("Tracker", {basePath: path.routePath, mode: "custom"})}>
                     Start path
                 </Button>

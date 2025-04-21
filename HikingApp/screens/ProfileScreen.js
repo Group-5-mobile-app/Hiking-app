@@ -229,7 +229,7 @@ const ProfileScreen = ({ navigation }) => {
                         <Card.Content>
                             <Text style={styles.cardTitle}>{t("profile.my_routes")}</Text>
                             
-                            {routes.map((route, index) => (
+                            {routes.map((route) => (
                                     <View key={route.id} style={styles.routeItem}>
                                         <View style={styles.routeHeader}>
                                             <Text style={styles.routeName}>{route.name}</Text>
