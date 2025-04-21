@@ -80,7 +80,7 @@
         "back": "Back",
         "completed_walks": "Completed Routes",
         "to_profile": "Upload to profile",
-        "details": {
+        "detail": {
             "length": "Length",
             "created": "Created",
             "follow": "Follow",

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Text, Card, Avatar, Divider, Portal, Dialog, Button, TextInput, IconButton, useTheme } from "react-native-paper";
 import { auth, db } from "../firebase/firebaseConfig";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, arrayRemove, getDoc, writeBatch } from "firebase/firestore";
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { useTranslation } from "react-i18next";
 import { getUploadedRoutes } from "../firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,6 +14,12 @@ const ProfileScreen = ({ navigation }) => {
     const [username, setUsername] = useState("");
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [bioText, setBioText] = useState("");
+    const [isEditingBio, setIsEditingBio] = useState(false);
+    const [tempBioText, setTempBioText] = useState("");
+    const [avatarBase64, setAvatarBase64] = useState(null);
+    const [isEditingAvatar, setIsEditingAvatar] = useState(false);
+    const [loadingAvatar, setLoadingAvatar] = useState(false);
     const [routes, setRoutes] = useState([]);
 
     
@@ -23,27 +31,132 @@ const ProfileScreen = ({ navigation }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [errorDialogVisible, setErrorDialogVisible] = useState(false);
 
-    const { i18n, t } = useTranslation();
+    const { t } = useTranslation();
 
     const theme = useTheme();
     const styles = getStyles(theme);
 
     useEffect(() => {
+        setLoading(true);
         if (auth.currentUser) {
             setEmail(auth.currentUser.email);
-            // avatariin emailin ensimmäinen kirjain
             if (auth.currentUser.email) {
                 const name = auth.currentUser.email.split('@')[0];
                 setUsername(name.charAt(0).toUpperCase());
             }
-            fetchFriends();
-            fetchUploadedRoutes();
+            Promise.all([
+                fetchFriends(),
+                fetchUserBio(),
+                fetchUserAvatarFromStorage()
+            ]).finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, []);
 
-    const handleLanguageChange = async (lang) => {
-        await AsyncStorage.setItem('language', lang);
-        i18n.changeLanguage(lang);
+    const fetchUserAvatarFromStorage = async () => {
+        setLoadingAvatar(true);
+        try {
+            const storedAvatar = await AsyncStorage.getItem('userAvatarBase64');
+            if (storedAvatar) {
+                setAvatarBase64(storedAvatar);
+            }
+        } catch (error) {
+            console.error("Error fetching avatar from AsyncStorage:", error);
+        } finally {
+            setLoadingAvatar(false);
+        }
+    };
+
+    const handlePickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            setErrorMessage(t('profile.avatar.permission_denied'));
+            setErrorDialogVisible(true);
+            return;
+        }
+    
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'Images',
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.2,
+            base64: true,
+        });
+    
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            setLoadingAvatar(true);
+            setIsEditingAvatar(false);
+            try {
+                let base64Data = result.assets[0].base64;
+
+                if (!base64Data) {
+                     console.log("Reading file as Base64...");
+                     base64Data = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+                         encoding: FileSystem.EncodingType.Base64,
+                     });
+                }
+
+                const sizeInBytes = base64Data.length * 0.75;
+                const maxSizeInMB = 0.5;
+                if (sizeInBytes > maxSizeInMB * 1024 * 1024) {
+                     setErrorMessage(t('profile.avatar.too_large', { maxSize: maxSizeInMB }));
+                     setErrorDialogVisible(true);
+                     setLoadingAvatar(false);
+                     return;
+                }
+                
+                await AsyncStorage.setItem('userAvatarBase64', base64Data);
+                setAvatarBase64(base64Data);
+                
+            } catch (error) {
+                 console.error("Error processing/saving image:", error);
+                 setErrorMessage(t('profile.avatar.save_error'));
+                 setErrorDialogVisible(true);
+            } finally {
+                 setLoadingAvatar(false);
+            }
+        }
+    };
+
+    const fetchUserBio = async () => {
+        try {
+            const userRef = doc(db, "user", auth.currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            
+            if (userDoc.exists() && userDoc.data().bio) {
+                setBioText(userDoc.data().bio);
+                setTempBioText(userDoc.data().bio);
+            } else {
+                setBioText(t("profile.about_me_placeholder"));
+                setTempBioText(t("profile.about_me_placeholder"));
+            }
+        } catch (error) {
+            console.error("Error fetching user bio:", error);
+            setBioText(t("profile.about_me_placeholder"));
+            setTempBioText(t("profile.about_me_placeholder"));
+        }
+    };
+
+    const handleSaveBio = async () => {
+        try {
+            const userRef = doc(db, "user", auth.currentUser.uid);
+            await updateDoc(userRef, {
+                bio: tempBioText
+            });
+            
+            setBioText(tempBioText);
+            setIsEditingBio(false);
+        } catch (error) {
+            console.error("Error saving bio:", error);
+            setErrorMessage(t("profile.bio.save_error"));
+            setErrorDialogVisible(true);
+        }
+    };
+
+    const handleCancelBioEdit = () => {
+        setTempBioText(bioText);
+        setIsEditingBio(false);
     };
 
     const fetchUploadedRoutes = async () => {
@@ -64,7 +177,6 @@ const ProfileScreen = ({ navigation }) => {
             if (userDoc.exists() && userDoc.data().friends) {
                 const friendsList = [];
                 
-                // hae kaverien data
                 for (const friendId of userDoc.data().friends) {
                     const friendRef = doc(db, "user", friendId);
                     const friendDoc = await getDoc(friendRef);
@@ -105,7 +217,6 @@ const ProfileScreen = ({ navigation }) => {
         const normalizedEmail = friendEmail.trim().toLowerCase();
 
         try {
-            // etsi käyttäjä emaililla
             const usersRef = collection(db, "user");
             const q = query(usersRef, where("email", "==", normalizedEmail));
             const querySnapshot = await getDocs(q);
@@ -119,7 +230,6 @@ const ProfileScreen = ({ navigation }) => {
             const friendDoc = querySnapshot.docs[0];
             const friendId = friendDoc.id;
             
-            // onko jo kaveri
             const userRef = doc(db, "user", auth.currentUser.uid);
             const userDoc = await getDoc(userRef);
             if (userDoc.exists() && userDoc.data().friends && userDoc.data().friends.includes(friendId)) {
@@ -132,7 +242,6 @@ const ProfileScreen = ({ navigation }) => {
             batch.update(userRef, {
                 friends: arrayUnion(friendId)
             });
-            // lisää kaveri myös kaverin kaverilistalle
             const friendRef = doc(db, "user", friendId);
             batch.update(friendRef, {
                 friends: arrayUnion(auth.currentUser.uid)
@@ -185,14 +294,54 @@ const ProfileScreen = ({ navigation }) => {
                     <Card style={styles.profileCard}>
                         <Card.Content>
                             <View style={styles.profileHeader}>
-                                <Avatar.Text 
-                                    size={70} 
-                                    label={username}
-                                    style={styles.avatar}
-                                />
+                                {loadingAvatar ? (
+                                    <View style={styles.avatarContainer}>
+                                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                                    </View>
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={isEditingAvatar ? handlePickImage : undefined}
+                                        disabled={!isEditingAvatar}
+                                        style={styles.avatarContainer}
+                                    >
+                                        {avatarBase64 ? (
+                                            <Avatar.Image
+                                                size={70}
+                                                source={{ uri: `data:image/jpeg;base64,${avatarBase64}` }}
+                                            />
+                                        ) : (
+                                            <Avatar.Text
+                                                size={70}
+                                                label={username}
+                                            />
+                                        )}
+                                        
+                                        {/* Camera Icon Overlay */} 
+                                        {isEditingAvatar && (
+                                            <View style={styles.cameraOverlay}>
+                                                <View style={styles.cameraIconBackground}>
+                                                    <IconButton
+                                                        icon="camera"
+                                                        size={24} // Adjust size as needed with background
+                                                        iconColor={theme.colors.onPrimary} // Color for icon on primary background
+                                                        style={styles.cameraIcon}
+                                                        disabled 
+                                                    />
+                                                </View>
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
+                                )}
                                 <View style={styles.profileInfo}>
                                     <Text style={styles.label}>{email}</Text>
                                 </View>
+                                <IconButton
+                                    icon="pencil"
+                                    size={24}
+                                    onPress={() => setIsEditingAvatar(!isEditingAvatar)}
+                                    style={styles.editAvatarIcon}
+                                    iconColor={isEditingAvatar ? theme.colors.primary : theme.colors.onSurfaceVariant}
+                                />
                             </View>
                             
                             <Divider style={styles.divider} />
@@ -214,17 +363,41 @@ const ProfileScreen = ({ navigation }) => {
                         </Card.Content>
                     </Card>
 
-                    {/* Bio Card */}
                     <Card style={styles.bioCard}>
                         <Card.Content>
-                            <Text style={styles.cardTitle}>{t("profile.about_me")}</Text>
-                            <Text style={styles.bioText}>
-                                {t("profile.about_me_placeholder")}
-                            </Text>
+                            <View style={styles.cardHeaderRow}>
+                                <Text style={styles.cardTitle}>{t("profile.about_me")}</Text>
+                                <IconButton
+                                    icon={isEditingBio ? "check" : "pencil"}
+                                    size={24}
+                                    onPress={isEditingBio ? handleSaveBio : () => setIsEditingBio(true)}
+                                />
+                                {isEditingBio && (
+                                    <IconButton
+                                        icon="close"
+                                        size={24}
+                                        onPress={handleCancelBioEdit}
+                                    />
+                                )}
+                            </View>
+                            
+                            {isEditingBio ? (
+                                <TextInput
+                                    value={tempBioText}
+                                    onChangeText={setTempBioText}
+                                    mode="outlined"
+                                    multiline
+                                    numberOfLines={4}
+                                    style={styles.bioTextInput}
+                                />
+                            ) : (
+                                <Text style={styles.bioText}>
+                                    {bioText}
+                                </Text>
+                            )}
                         </Card.Content>
                     </Card>
 
-                    {/* Routes Card */}
                     <Card style={styles.routesCard}>
                         <Card.Content>
                             <Text style={styles.cardTitle}>{t("profile.my_routes")}</Text>
@@ -244,7 +417,6 @@ const ProfileScreen = ({ navigation }) => {
                         </Card.Content>
                     </Card>
 
-                    {/* Friends Card */}
                     <Card style={styles.friendsCard}>
                         <Card.Content>
                             <View style={styles.cardHeaderRow}>
@@ -267,7 +439,6 @@ const ProfileScreen = ({ navigation }) => {
                                         />
                                         <View style={styles.friendInfo}>
                                             <Text style={styles.friendName}>{friend.name}</Text>
-                                            <Text style={styles.friendStats}>{friend.trails} {t("profile.trails")}</Text>
                                         </View>
                                         <IconButton
                                             icon="close"
@@ -280,16 +451,6 @@ const ProfileScreen = ({ navigation }) => {
                                     </View>
                                 ))
                             )}
-                        </Card.Content>
-                    </Card>
-
-                    <Card style={styles.languageCard}>
-                        <Card.Content>
-                            <Text style={styles.cardTitle}>{t("set_language")}</Text>
-                            <View style={styles.languageButtons}>
-                                <Button mode="contained" onPress={() => handleLanguageChange("fi")}>{t("finnish")}</Button>
-                                <Button mode="contained" onPress={() => handleLanguageChange("en")}>{t("english")}</Button>
-                            </View>
                         </Card.Content>
                     </Card>
                 </View>
@@ -445,13 +606,50 @@ const getStyles = (theme) =>
       profileHeader: {
           flexDirection: "row",
           alignItems: "center",
+          position: 'relative',
       },
-      avatar: {
+      avatarContainer: {
+          width: 70,
+          height: 70,
           marginRight: 20,
+          borderRadius: 35,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: theme.colors.surfaceVariant,
+          position: 'relative',
+          overflow: 'hidden',
+      },
+      cameraOverlay: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'transparent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1,
+      },
+      cameraIconBackground: {
+          backgroundColor: theme.colors.primary + 'aa',
+          borderRadius: 20,
+          padding: 4,
+      },
+      cameraIcon: {
+          margin: 0,
       },
       profileInfo: {
           flexDirection: "column",
           flex: 1,
+          justifyContent: 'center',
+      },
+      editAvatarIcon: {
+          position: 'absolute',
+          right: -10,
+          top: -10,
+          zIndex: 2,
+          backgroundColor: theme.colors.surface,
+          borderRadius: 12,
       },
       divider: {
           marginVertical: 15,
@@ -535,6 +733,10 @@ const getStyles = (theme) =>
           flexDirection: "row",
           justifyContent: "space-evenly",
           gap: 10,
+      },
+      bioTextInput: {
+          backgroundColor: theme.colors.background,
+          fontSize: 16,
       },
   });
   
