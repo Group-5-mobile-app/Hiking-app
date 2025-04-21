@@ -31,7 +31,7 @@ const ProfileScreen = ({ navigation }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [errorDialogVisible, setErrorDialogVisible] = useState(false);
 
-    const { i18n, t } = useTranslation();
+    const { t } = useTranslation();
 
     const theme = useTheme();
     const styles = getStyles(theme);
@@ -157,11 +157,6 @@ const ProfileScreen = ({ navigation }) => {
     const handleCancelBioEdit = () => {
         setTempBioText(bioText);
         setIsEditingBio(false);
-    };
-
-    const handleLanguageChange = async (lang) => {
-        await AsyncStorage.setItem('language', lang);
-        i18n.changeLanguage(lang);
     };
 
     const fetchUploadedRoutes = async () => {
@@ -444,7 +439,6 @@ const ProfileScreen = ({ navigation }) => {
                                         />
                                         <View style={styles.friendInfo}>
                                             <Text style={styles.friendName}>{friend.name}</Text>
-                                            <Text style={styles.friendStats}>{friend.trails} {t("profile.trails")}</Text>
                                         </View>
                                         <IconButton
                                             icon="close"
@@ -457,16 +451,6 @@ const ProfileScreen = ({ navigation }) => {
                                     </View>
                                 ))
                             )}
-                        </Card.Content>
-                    </Card>
-
-                    <Card style={styles.languageCard}>
-                        <Card.Content>
-                            <Text style={styles.cardTitle}>{t("set_language")}</Text>
-                            <View style={styles.languageButtons}>
-                                <Button mode="contained" onPress={() => handleLanguageChange("fi")}>{t("finnish")}</Button>
-                                <Button mode="contained" onPress={() => handleLanguageChange("en")}>{t("english")}</Button>
-                            </View>
                         </Card.Content>
                     </Card>
                 </View>
