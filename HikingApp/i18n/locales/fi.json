@@ -79,6 +79,7 @@
         "save_route": "Tallenna Reitti",
         "back": "Takaisin",
         "completed_walks": "Käydyt Reitit",
-        "to_profile": "Vie Profiiliin"
+        "to_profile": "Vie Profiiliin",
+        "steps": "Askelia"
     }
 }

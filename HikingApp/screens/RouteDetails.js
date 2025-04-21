@@ -4,7 +4,7 @@ import { Text, useTheme, Appbar  } from "react-native-paper";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
 
 const RouteDetails = ({ route, navigation }) => {
-    const { path, name, length, duration, createdAt } = route.params;
+    const { path, name, length, duration, steps, createdAt } = route.params;
 
         const theme = useTheme();
         const styles = getStyles(theme);
@@ -15,6 +15,12 @@ const RouteDetails = ({ route, navigation }) => {
         const secs = seconds % 60;
         return `${hrs}h ${mins}m ${secs}s`;
     };
+
+    const formatDate = (timestampObj) => {
+        if (!timestampObj?.seconds) return "Unknown";
+        const date = new Date(timestampObj.seconds * 1000);
+        return date.toLocaleDateString();
+      };
 
     return (
         <View style={{ flex: 1 }}>
@@ -43,7 +49,8 @@ const RouteDetails = ({ route, navigation }) => {
                 <Text style={styles.title}>{name}</Text>
                 <Text>Length: {(length/1000).toFixed(2)} km</Text>
                 <Text>Duration: {formatDuration(duration)}</Text>
-                <Text>Date: {createdAt}</Text>
+                <Text>Steps: {steps}</Text>
+                <Text>Date: {formatDate(createdAt)}</Text>
             </View>
         </View>
     );

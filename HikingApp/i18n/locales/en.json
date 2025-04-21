@@ -83,7 +83,8 @@
         "details": {
             "length": "Length",
             "created": "Created",
-            "follow": "Follow"
+            "follow": "Follow",
+            "steps": "Steps"
         }
     }
 }

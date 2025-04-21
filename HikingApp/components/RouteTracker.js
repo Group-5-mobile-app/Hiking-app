@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Alert, StyleSheet, View, } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
-import * as Location from 'expo-location'
+import * as Location from 'expo-location';
+import { Pedometer } from 'expo-sensors';
 import { saveRoute } from "../firebase/firestore";
 
 const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMode, onTrackingEnd }) => {
@@ -16,9 +17,11 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
     const [distance, setDistance] = useState(0);
     const [showNamePrompt, setShowNamePrompt] = useState(false);
     const [routeName, setRouteName] = useState("");
+    const [steps, setSteps] = useState(0);
     const watchRef = useRef(null);
     const coordsRef = useRef([]);
     const mapRef = useRef(null);
+    const pedometersub = useRef(null);
 
     useEffect(() => {
         console.log("RouteTracker loaded with:", { basePath, mode });
@@ -52,6 +55,10 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
         setFinalCoords([]);
         setStartTime(Date.now());
         setDistance(0);
+
+        pedometersub.current = Pedometer.watchStepCount(result => {
+            setSteps(result.steps);
+        });
 
         watchRef.current = await Location.watchPositionAsync(
             { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 3 },
@@ -98,19 +105,22 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
     const stopTracking = async () => {
         console.log("Stop tracking called");
 
+        pedometersub.current?.remove();
+        pedometersub.current = null;
         watchRef.current?.remove();
         setTracking(false);
         console.log("Tracking stopped");
 
         const currentCoords = coordsRef.current;
 
+        console.log("Showing name prompt");
+        setShowNamePrompt(true);
+        
         if (mode === "new" && currentCoords.length > 1) {
             await fetchEnhancedRoute(currentCoords);
         } else {
             console.log("Not enough coords to fetch enhanced route:", currentCoords.length);
         }
-        console.log("Showing name prompt");
-        setShowNamePrompt(true);
     };
 
     const fetchEnhancedRoute = async (coords) => {
@@ -231,13 +241,15 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
                                 name: routeName,
                                 length: lengthInM,
                                 duration,
-                                path: cleanedPath
+                                path: cleanedPath,
+                                steps: steps,
                             };
 
                             const success = await saveRoute(routeData);
 
                             if (success) {
                                 Alert.alert("Success", "Route saved");
+                                setShowNamePrompt(false);
                                 if (navigation) {
                                     navigation.navigate("Paths");
                                 }
@@ -257,6 +269,7 @@ const RouteTracker = ({ route, navigation, basePath: propBasePath, mode: propMod
             <View style={styles.panel}>
                 <Text>Time: {getDuration()} s</Text>
                 <Text>Distance: {(distance / 1000).toFixed(2)} km</Text>
+                <Text>Steps: {steps}</Text>
                 {(mode === "new" || mode === "custom" || mode === "public") && (
                     <>
                     {!tracking ? (
