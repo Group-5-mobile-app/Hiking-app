@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Alert, TextInput } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Alert, TextInput, ScrollView } from "react-native";
 import { Text, Card, Button, useTheme, Dialog, Portal } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import deleteUser from "../components/deleteUser";
@@ -85,22 +85,22 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
           }}]);};
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Asetukset</Text>
-          <Text style={styles.label}>Vaihda sovelluksen teema</Text>
+        <Text style={styles.title} >{t("settings")}</Text>
+          <Text style={styles.label}>{t("set_theme")}</Text>
 
           <TouchableOpacity
             style={isDarkMode ? styles.buttonDark : styles.buttonLight}
             onPress={() => setIsDarkMode(!isDarkMode)}
           >
             <Text style={styles.buttonText}>
-              {isDarkMode ? "Tumma teema" : "Vaalea teema"}
+              {isDarkMode ? t("dark_theme") : t("white_theme")}
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.label}>Kieliasetukset</Text>
+          <Text style={styles.label}>{t("language_settings")}</Text>
 
           <View style={styles.languageContainer}>
             <TouchableOpacity style={styles.languageButton} onPress={() => handleLanguageChange("fi")}>
@@ -115,7 +115,7 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
 
       <Card style={styles.emailCard}>
         <Card.Content>
-            <Text style={styles.title}>Vaihda sähköposti</Text>
+            <Text style={styles.title}>{t("change_email")}</Text>
             <TextInput
                 label="Uusi sähköpostiosoite"
                 value={newEmail}
@@ -127,7 +127,7 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
                 style={[styles.updateButton, !auth.currentUser && styles.disabledButton]}
                 onPress={handleUpdateEmail}
                 disabled={!auth.currentUser}>
-                <Text style={{color: "white"}}>Lähetä vahvistuslinkki</Text>
+                <Text style={{color: "white"}}>{t("send_confirmation_link")}</Text>
             </TouchableOpacity>
         </Card.Content>
     </Card>
@@ -156,25 +156,25 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
 
       <Card style={styles.card}>
         <Card.Content>
-            <Text style={styles.title}>Poista käyttäjä</Text>
+            <Text style={styles.title}>{t("delete_user")}</Text>
             <Button 
                 mode="contained" 
                 style={styles.deleteButton}
                 labelStyle={{color: "white" }}
                 onPress={confirmDelete}
                 disabled={!auth.currentUser}>
-                Poista käyttäjä
+                {t("delete_user")}
             </Button>
         </Card.Content>
     </Card>
-    </View>
+    </ScrollView>
   );
 };
 
 const getStyles = (theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: theme.colors.background,
@@ -183,7 +183,8 @@ const getStyles = (theme) =>
       width: "80%",
       padding: 20,
       backgroundColor: theme.colors.primary,
-      marginBottom: 30,
+      marginBottom: 15,
+      marginTop: 15,
     },
     title: {
       fontSize: 24,
@@ -224,7 +225,7 @@ const getStyles = (theme) =>
     languageContainer: {
       padding: 10,
       borderRadius: 5,
-      marginTop: 10,
+      marginTop: 0,
     },
     languageButton: {
       padding: 10,
@@ -241,7 +242,8 @@ const getStyles = (theme) =>
       width: "80%",
       padding: 20,
       backgroundColor: theme.colors.primary,
-      marginBottom: 30,
+      marginBottom: 15,
+      marginTop: 15,
     },
     input: {
       marginBottom: 10,
