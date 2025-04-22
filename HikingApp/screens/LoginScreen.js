@@ -3,6 +3,7 @@ import { Alert, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, Button, TextInput, Card, useTheme } from "react-native-paper";
 import { loginUser, authStateListener } from "../firebase/auth";
 import { getAuth, signOut } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ const LoginScreen = ({ navigation }) => {
 
   const theme = useTheme();
   const styles = getStyles(theme);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const unsubscribe = authStateListener((user) => {
@@ -25,28 +27,28 @@ const LoginScreen = ({ navigation }) => {
       const user = await loginUser(email, password);
       navigation.navigate("Koti");
       setLoggedInUser(user);
-      Alert.alert("Kirjautuminen onnistui", `Tervetuloa takaisin, ${user.email}!`);
+      Alert.alert(t("login.login_success"), t("login.welcome_back", { email: user.email }));
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert(t("login.error"), error.message);
     }
   };
 
   const handleLogout = () => {
     Alert.alert(
-      "Oletko varma, että haluat kirjautua ulos?",
+      t("login.logout_confirm"),
       undefined,
       [
-        { text: "Peruuta", style: "cancel" },
-        { text: "Kirjaudu Ulos", style: "destructive",
+        { text: t("login.cancel"), style: "cancel" },
+        { text: t("login.logout"), style: "destructive",
           onPress: async () => {
             try {
               const auth = getAuth();
               await signOut(auth);
               setLoggedInUser(null);
               navigation.navigate("Koti");
-              Alert.alert("Kirjauduit ulos!");
+              Alert.alert(t("login.logout_success"));
             } catch (error) {
-              Alert.alert("Error", error.message);
+              Alert.alert(t("login.error"), error.message);
             }},},]);};
 
   return (
@@ -54,23 +56,23 @@ const LoginScreen = ({ navigation }) => {
 
       {!loggedInUser && ( //Näkyy jos käyttäjä ei ole kirjautunut
       <View>
-      <Text style={styles.title}>Kirjaudu sisään</Text>
+      <Text style={styles.title}>{t("login.login")}</Text>
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.label}>Sähköposti</Text>
+          <Text style={styles.label}>{t("login.email")}</Text>
           <TextInput
             mode="outlined"
-            placeholder="Sähköposti"
+            placeholder={t("login.email")}
             value={email}
             onChangeText={setEmail}
             textColor={theme.colors.text}
             style={styles.input}
           />
 
-          <Text style={styles.label}>Salasana</Text>
+          <Text style={styles.label}>{t("login.password")}</Text>
           <TextInput
             mode="outlined"
-            placeholder="Salasana"
+            placeholder={t("login.password")}
             value={password}
             secureTextEntry
             onChangeText={setPassword}
@@ -84,11 +86,11 @@ const LoginScreen = ({ navigation }) => {
             onPress={handleLogin}
             labelStyle={styles.whiteLabel}
           >
-            Kirjaudu sisään
+            {t("login.login")}
           </Button>
 
           <TouchableOpacity onPress={() => navigation.navigate("Luo")}>
-            <Text style={styles.link}>Ei tiliä? Luo tili.</Text>
+            <Text style={styles.link}>{t("login.no_account")}</Text>
           </TouchableOpacity>
         </Card.Content>
       </Card>
@@ -97,11 +99,11 @@ const LoginScreen = ({ navigation }) => {
 
       {loggedInUser && ( // Näkyy jos käyttäjä on kirjautunut
       <View>
-      <Text style={styles.title}>Kirjaudu ulos</Text>
+      <Text style={styles.title}>{t("login.logout")}</Text>
         <Card style={styles.card}>
           <Card.Content>
             <Text style={styles.label}>
-              Moi, {loggedInUser.email}! Joko lähtemässä? :)
+              {t("login.hi")}, {loggedInUser.email}! {t("login.logout_message")} :)
             </Text>
             <Button
             mode="contained"
@@ -109,7 +111,7 @@ const LoginScreen = ({ navigation }) => {
             onPress={handleLogout}
             labelStyle={styles.whiteLabel}
           >
-            Kirjaudu ulos
+            {t("login.logout")}
           </Button>
           </Card.Content>
         </Card>

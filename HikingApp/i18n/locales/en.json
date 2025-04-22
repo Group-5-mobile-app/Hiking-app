@@ -1,4 +1,5 @@
 {
+    "app_title": "Hiking App",
     "nav": {
         "home": "Home",
         "map": "Map",
@@ -86,5 +87,61 @@
             "follow": "Follow",
             "steps": "Steps"
         }
+    },
+    "home": {
+        "map": "Map",
+        "paths": "Paths",
+        "profile": "Profile",
+        "settings": "Settings"
+    },
+    "login": {
+        "login": "Login",
+        "logout": "Logout",
+        "logout_confirm": "Logout Confirm",
+        "logout_success": "Logout Success",
+        "login_success": "Login Success",
+        "welcome_back": "Welcome back, {{email}}!",
+        "email": "Email",
+        "password": "Password",
+        "no_account": "No account? Create one.",
+        "hi": "Hi",
+        "logout_message": "Leaving already?",
+        "cancel": "Cancel",
+        "error": "Error"
+    },
+    "signup": {
+        "create_account": "Create Account",
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "already_account": "Already have an account?",
+        "success": "Account created successfully!",
+        "welcome": "Welcome",
+        "error": "Error"
+    },
+    "settings": {
+        "settings": "Settings",
+        "theme": "Theme",
+        "light_theme": "Light Theme",
+        "dark_theme": "Dark Theme",
+        "language_settings": "Language Settings",
+        "new_email": "New Email",
+        "change_email": "Change Email",
+        "send_verification_link": "Send Verification Link",
+        "verify_identity": "Verify Identity",
+        "verify_identity_message": "Changing email requires re-login. Enter your password to continue.",
+        "password": "Password",
+        "cancel": "Cancel",
+        "verify": "Verify",
+        "delete_user": "Delete User",
+        "confirm_delete": "Confirm Delete",
+        "confirm_delete_message": "Are you sure you want to delete your account? This cannot be undone.",
+        "user_deleted": "User deleted",
+        "verification_link_sent": "Verification link sent",
+        "verification_link_sent_message": "Verification link sent. Check your email.",
+        "invalid_email": "Invalid email",
+        "enter_password": "Enter password",
+        "user_not_found": "User not found",
+        "error": "Error"
     }
 }

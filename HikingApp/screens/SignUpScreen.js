@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Button, Text, TextInput, Card, useTheme } from "react-native-paper";
 import { registerUser } from "../firebase/auth";
 import { getAuth, signOut } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 
 const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -11,39 +12,40 @@ const SignUpScreen = ({ navigation }) => {
 
   const theme = useTheme();
   const styles = getStyles(theme);
+  const { t } = useTranslation();
 
   const handleSignUp = async () => {
     try {
       const newUser = await registerUser(email, password, confirmPassword);
       const auth = getAuth();
       await signOut(auth);
-      Alert.alert("Tili luotu onnistuneesti!", `Tervetuloa ${newUser.email}! \nOle hyvä ja kirjaudu uudelle käyttäjällesi!`);
+      Alert.alert(t("signup.success"), t("signup.welcome", { email: newUser.email }));
       navigation.navigate("Kirjaudu");
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert(t("signup.error"), error.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Luo tili</Text>
+      <Text style={styles.title}>{t("signup.create_account")}</Text>
 
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.label}>Sähköposti</Text>
+          <Text style={styles.label}>{t("signup.email")}</Text>
           <TextInput
             mode="outlined"
-            placeholder="Lisää sähköposti"
+            placeholder={t("signup.email")}
             value={email}
             onChangeText={setEmail}
             textColor={theme.colors.text}
             style={styles.input}
           />
 
-          <Text style={styles.spacing}>Salasana</Text>
+          <Text style={styles.spacing}>{t("signup.password")}</Text>
           <TextInput
             mode="outlined"
-            placeholder="Lisää salasana"
+            placeholder={t("signup.password")}
             value={password}
             secureTextEntry
             onChangeText={setPassword}
@@ -51,10 +53,10 @@ const SignUpScreen = ({ navigation }) => {
             style={styles.input}
           />
 
-          <Text style={styles.spacing}>Salasana uudelleen</Text>
+          <Text style={styles.spacing}>{t("signup.confirm_password")}</Text>
           <TextInput
             mode="outlined"
-            placeholder="Varmista salasana"
+            placeholder={t("signup.confirm_password")}
             value={confirmPassword}
             secureTextEntry
             onChangeText={setConfirmPassword}
@@ -66,11 +68,11 @@ const SignUpScreen = ({ navigation }) => {
            onPress={handleSignUp}
           labelStyle={styles.whiteLabel}
            >
-            Luo tili
+            {t("signup.create_account")}
           </Button>
 
           <TouchableOpacity onPress={() => navigation.navigate("Kirjaudu")}>
-            <Text style={styles.link}>Minulla on jo tili.</Text>
+            <Text style={styles.link}>{t("signup.already_account")}</Text>
           </TouchableOpacity>
         </Card.Content>
       </Card>
