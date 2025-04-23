@@ -2,8 +2,10 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, useTheme, Appbar  } from "react-native-paper";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
+import { useTranslation } from "react-i18next";
 
 const RouteDetails = ({ route, navigation }) => {
+    const { t } = useTranslation();
     const { path, name, length, duration, steps, createdAt } = route.params;
 
         const theme = useTheme();
@@ -47,10 +49,10 @@ const RouteDetails = ({ route, navigation }) => {
             </MapView>
             <View style={styles.infoBox}>
                 <Text style={styles.title}>{name}</Text>
-                <Text>Length: {(length/1000).toFixed(2)} km</Text>
-                <Text>Duration: {formatDuration(duration)}</Text>
-                <Text>Steps: {steps}</Text>
-                <Text>Date: {formatDate(createdAt)}</Text>
+                <Text>{t("route.length")}: {(length/1000).toFixed(2)} km</Text>
+                <Text>{t("route.duration")}: {formatDuration(duration)}</Text>
+                <Text>{t("route.steps")}: {steps}</Text>
+                <Text>{t("route.date")}: {formatDate(createdAt)}</Text>
             </View>
         </View>
     );

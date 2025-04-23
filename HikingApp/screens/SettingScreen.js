@@ -24,7 +24,7 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
 
   const handleUpdateEmail = async () => {
     if (!newEmail || newEmail === email) {
-      Alert.alert("Virhe", "Syötä uusi sähköpostiosoite");
+      Alert.alert(t("error"), t("settings.invalid_email"));
       return;
     }
     setShowReauthDialog(true);
@@ -35,12 +35,12 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
   };
   const reauthenticateAndUpdateEmail = async () => {
     if (!password) {
-        Alert.alert("Virhe", "Syötä salasanasi");
+        Alert.alert(t("error"), t("settings.enter_password"));
         return;
     }
     try {
         const user = auth.currentUser;
-        if (!user) throw new Error("Käyttäjää ei löydy");
+        if (!user) throw new Error(t("settings.user_not_found"));
 
         const credential = EmailAuthProvider.credential(
             user.email,
@@ -55,32 +55,32 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
         setShowReauthDialog(false);
         
         Alert.alert(
-            "Vahvistuslinkki lähetetty", 
-            "Vahvistuslinkki on lähetetty uuteen sähköpostiosoitteeseen. Vahvista se aktivoidaksesi uuden sähköpostisi."
+            t("settings.verification_link_sent"), 
+            t("settings.verification_link_sent_message")
         );
         
     } catch (error) {
         console.error("Error updating email:", error);
-        Alert.alert("Virhe", error.message);
+        Alert.alert(t("error"), error.message);
         setPassword("");
     }
 };
 
   const confirmDelete = () => {
     Alert.alert(
-      "Vahvista poisto",
-      "Oletko varma, että haluat poistaa käyttäjätilisi? Tätä ei voi perua.",
+      t("settings.confirm_delete"),
+      t("settings.confirm_delete_message"),
       [
-        { text: "Peruuta", style: "cancel" },
-        { text: "Kyllä, poista käyttäjä", style: "destructive",
+        { text: t("settings.cancel"), style: "cancel" },
+        { text: t("settings.delete_user"), style: "destructive",
           onPress: async () => {
             try {
               await deleteUser();
-              Alert.alert("Käyttäjä poistettu");
+              Alert.alert(t("settings.user_deleted"));
               navigation.navigate("Koti");
             } catch (error) {
               console.error("Virhe poistettaessa:", error);
-              Alert.alert("Virhe", error.message);
+              Alert.alert(t("error"), error.message);
             }
           }}]);};
 
@@ -88,19 +88,18 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
     <ScrollView contentContainerStyle={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-        <Text style={styles.title} >{t("settings")}</Text>
-          <Text style={styles.label}>{t("set_theme")}</Text>
-
+          <Text style={styles.title}>{t("settings.settings")}</Text>
+          <Text style={styles.label}>{t("settings.theme")}</Text>
           <TouchableOpacity
             style={isDarkMode ? styles.buttonDark : styles.buttonLight}
             onPress={() => setIsDarkMode(!isDarkMode)}
           >
             <Text style={styles.buttonText}>
-              {isDarkMode ? t("dark_theme") : t("white_theme")}
+              {isDarkMode ? t("settings.dark_theme") : t("settings.light_theme")}
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.label}>{t("language_settings")}</Text>
+          <Text style={styles.label}>{t("settings.language_settings")}</Text>
 
           <View style={styles.languageContainer}>
             <TouchableOpacity style={styles.languageButton} onPress={() => handleLanguageChange("fi")}>
@@ -115,9 +114,9 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
 
       <Card style={styles.emailCard}>
         <Card.Content>
-            <Text style={styles.title}>{t("change_email")}</Text>
+            <Text style={styles.title}>{t("settings.change_email")}</Text>
             <TextInput
-                label="Uusi sähköpostiosoite"
+                label={t("settings.new_email")}
                 value={newEmail}
                 onChangeText={setNewEmail}
                 style={styles.input}
@@ -127,19 +126,19 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
                 style={[styles.updateButton, !auth.currentUser && styles.disabledButton]}
                 onPress={handleUpdateEmail}
                 disabled={!auth.currentUser}>
-                <Text style={{color: "white"}}>{t("send_confirmation_link")}</Text>
+                <Text style={{color: "white"}}>{t("settings.send_verification_link")}</Text>
             </TouchableOpacity>
         </Card.Content>
     </Card>
     <Portal>
         <Dialog style={styles.dialog} visible={showReauthDialog} onDismiss={cancelReauthentication}>
-            <Dialog.Title style={styles.dialogTitle}>Vahvista henkilöllisyytesi</Dialog.Title>
+            <Dialog.Title style={styles.dialogTitle}>{t("settings.verify_identity")}</Dialog.Title>
             <Dialog.Content>
                 <Text style={styles.dialogText}>
-                    Sähköpostiosoitteen muuttaminen vaatii uudelleenkirjautumisen. Syötä salasanasi jatkaaksesi.
+                    {t("settings.verify_identity_message")}
                 </Text>
                 <TextInput
-                    label="Salasana"
+                    label={t("settings.password")}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
@@ -148,22 +147,22 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
                 />
             </Dialog.Content>
             <Dialog.Actions>
-                <Button onPress={cancelReauthentication}>Peruuta</Button>
-                <Button onPress={reauthenticateAndUpdateEmail}>Vahvista</Button>
+                <Button onPress={cancelReauthentication}>{t("settings.cancel")}</Button>
+                <Button onPress={reauthenticateAndUpdateEmail}>{t("settings.verify")}</Button>
             </Dialog.Actions>
         </Dialog>
     </Portal>
 
       <Card style={styles.card}>
         <Card.Content>
-            <Text style={styles.title}>{t("delete_user")}</Text>
+            <Text style={styles.title}>{t("settings.delete_user")}</Text>
             <Button 
                 mode="contained" 
                 style={styles.deleteButton}
                 labelStyle={{color: "white" }}
                 onPress={confirmDelete}
                 disabled={!auth.currentUser}>
-                {t("delete_user")}
+                {t("settings.delete_user")}
             </Button>
         </Card.Content>
     </Card>

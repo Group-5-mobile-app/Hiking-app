@@ -1,4 +1,5 @@
 {
+    "app_title": "Hiking App",
     "nav": {
         "home": "Koti",
         "map": "Kartta",
@@ -88,6 +89,75 @@
         "back": "Takaisin",
         "completed_walks": "Käydyt Reitit",
         "to_profile": "Vie Profiiliin",
-        "steps": "Askelia"
+        "steps": "Askelia",
+        "detail": {
+            "length": "Pituus",
+            "created": "Luotu",
+            "follow": "Seuraa",
+            "steps": "Askelia",
+            "start": "Aloita reitti"
+        }
+    },
+    "home": {
+        "map": "Kartta",
+        "paths": "Reitit",
+        "profile": "Profiili",
+        "settings": "Asetukset"
+    },
+    "login": {
+        "login": "Kirjaudu",
+        "logout": "Kirjaudu ulos",
+        "logout_confirm": "Haluatko varmasti kirjautua ulos?",
+        "logout_success": "Kirjautuminen onnistui",
+        "login_success": "Kirjautumisen onnistui",
+        "welcome_back": "Tervetuloa takaisin, ",
+        "email": "Sähköposti",
+        "password": "Salasana",
+        "no_account": "Ei tiliä? Luo tili.",
+        "hi": "Moi",
+        "logout_message": "Joko lähtemässä?",
+        "cancel": "Peruuta",
+        "error": "Virhe"
+    },
+    "signup": {
+        "create_account": "Luo tili",
+        "email": "Sähköposti",
+        "password": "Salasana",
+        "confirm_password": "Varmista salasana",
+        "already_account": "Onko sinulla jo tili?",
+        "success": "Tili luotu onnistuneesti!",
+        "welcome": "Tervetuloa",
+        "error": "Virhe"
+    },
+    "settings": {
+        "settings": "Asetukset",
+        "theme": "Teema",
+        "light_theme": "Vaalea teema",
+        "dark_theme": "Tumma teema",
+        "language_settings": "Kieliasetukset",
+        "new_email": "Uusi sähköpostiosoite",
+        "change_email": "Vaihda sähköposti",
+        "send_verification_link": "Lähetä vahvistuslinkki",
+        "verify_identity": "Vahvista henkilöllisyytesi",
+        "verify_identity_message": "Sähköpostiosoitteen muuttaminen vaatii uudelleenkirjautumisen. Syötä salasanasi jatkaaksesi.",
+        "password": "Salasana",
+        "cancel": "Peruuta",
+        "verify": "Vahvista",
+        "delete_user": "Poista käyttäjä",
+        "confirm_delete": "Vahvista poisto",
+        "confirm_delete_message": "Oletko varma, että haluat poistaa käyttäjätilisi? Tätä ei voi perua.",
+        "user_deleted": "Käyttäjä poistettu",
+        "verification_link_sent": "Vahvistuslinkki lähetetty",
+        "verification_link_sent_message": "Vahvistuslinkki lähetetty. Tarkista sähköpostisi.",
+        "invalid_email": "Virheellinen sähköpostiosoite",
+        "enter_password": "Syötä salasanasi",
+        "user_not_found": "Käyttäjää ei löydy",
+        "error": "Virhe"
+    },
+    "route": {
+        "length": "Pituus",
+        "duration": "Kesto",
+        "steps": "Askelia",
+        "date": "Päivämäärä"
     }
 }
