@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Alert, TextInput } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Alert, TextInput, ScrollView } from "react-native";
 import { Text, Card, Button, useTheme, Dialog, Portal } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import deleteUser from "../components/deleteUser";
@@ -85,12 +85,11 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
           }}]);};
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.title}>{t("settings.settings")}</Text>
           <Text style={styles.label}>{t("settings.theme")}</Text>
-
           <TouchableOpacity
             style={isDarkMode ? styles.buttonDark : styles.buttonLight}
             onPress={() => setIsDarkMode(!isDarkMode)}
@@ -167,14 +166,14 @@ const SettingScreen = ({ isDarkMode, setIsDarkMode }) => {
             </Button>
         </Card.Content>
     </Card>
-    </View>
+    </ScrollView>
   );
 };
 
 const getStyles = (theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: theme.colors.background,
@@ -183,7 +182,8 @@ const getStyles = (theme) =>
       width: "80%",
       padding: 20,
       backgroundColor: theme.colors.primary,
-      marginBottom: 30,
+      marginBottom: 15,
+      marginTop: 15,
     },
     title: {
       fontSize: 24,
@@ -224,7 +224,7 @@ const getStyles = (theme) =>
     languageContainer: {
       padding: 10,
       borderRadius: 5,
-      marginTop: 10,
+      marginTop: 0,
     },
     languageButton: {
       padding: 10,
@@ -241,7 +241,8 @@ const getStyles = (theme) =>
       width: "80%",
       padding: 20,
       backgroundColor: theme.colors.primary,
-      marginBottom: 30,
+      marginBottom: 15,
+      marginTop: 15,
     },
     input: {
       marginBottom: 10,

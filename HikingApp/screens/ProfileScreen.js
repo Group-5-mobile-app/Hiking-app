@@ -44,10 +44,12 @@ const ProfileScreen = ({ navigation }) => {
                 const name = auth.currentUser.email.split('@')[0];
                 setUsername(name.charAt(0).toUpperCase());
             }
+            
             Promise.all([
                 fetchFriends(),
                 fetchUserBio(),
-                fetchUserAvatarFromStorage()
+                fetchUserAvatarFromStorage(),
+                fetchUploadedRoutes()                
             ]).finally(() => setLoading(false));
         } else {
             setLoading(false);
