@@ -282,13 +282,6 @@ const ProfileScreen = ({ navigation }) => {
         }
     };
 
-    // placeholder tilasto dataa
-    const userStats = {
-        totalDistance: 178.5,
-        totalSteps: 236400,
-        totalRoutes: 14
-    };
-
     return (
         <>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -346,22 +339,6 @@ const ProfileScreen = ({ navigation }) => {
                                 />
                             </View>
                             
-                            <Divider style={styles.divider} />
-                            
-                            <View style={styles.statsContainer}>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{userStats.totalDistance} km</Text>
-                                    <Text style={styles.statLabel}>{t("distance")}</Text>
-                                </View>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{userStats.totalSteps}</Text>
-                                    <Text style={styles.statLabel}>{t("steps")}</Text>
-                                </View>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{userStats.totalRoutes}</Text>
-                                    <Text style={styles.statLabel}>{t("routes")}</Text>
-                                </View>
-                            </View>
                         </Card.Content>
                     </Card>
 
