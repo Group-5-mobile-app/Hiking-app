@@ -85,7 +85,8 @@
             "length": "Length",
             "created": "Created",
             "follow": "Follow",
-            "steps": "Steps"
+            "steps": "Steps",
+            "start": "Start path"
         }
     },
     "home": {
@@ -143,5 +144,11 @@
         "enter_password": "Enter password",
         "user_not_found": "User not found",
         "error": "Error"
+    },
+    "route": {
+        "length": "Length",
+        "duration": "Duration",
+        "steps": "Steps",
+        "date": "Date"
     }
 }

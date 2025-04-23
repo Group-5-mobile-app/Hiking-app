@@ -81,7 +81,14 @@
         "back": "Takaisin",
         "completed_walks": "Käydyt Reitit",
         "to_profile": "Vie Profiiliin",
-        "steps": "Askelia"
+        "steps": "Askelia",
+        "detail": {
+            "length": "Pituus",
+            "created": "Luotu",
+            "follow": "Seuraa",
+            "steps": "Askelia",
+            "start": "Aloita reitti"
+        }
     },
     "home": {
         "map": "Kartta",
@@ -138,5 +145,11 @@
         "enter_password": "Syötä salasanasi",
         "user_not_found": "Käyttäjää ei löydy",
         "error": "Virhe"
+    },
+    "route": {
+        "length": "Pituus",
+        "duration": "Kesto",
+        "steps": "Askelia",
+        "date": "Päivämäärä"
     }
 }
